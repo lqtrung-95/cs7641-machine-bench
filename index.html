@@ -1,0 +1,1510 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style><title>CS 7641 Machine Bench</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#FBF9F4; --surface:#FFFFFF; --surface-2:#F5F2E9;
+  --ink:#191D25; --ink-2:#3A4150; --muted:#616978; --faint:#8B93A1;
+  --line:#E4DECF; --line-2:#D3CBB6;
+  --gold:#8E7727; --gold-bright:#B3A369; --gold-soft:#F2ECD8;
+  --navy:#003057; --navy-soft:#E4EBF2;
+  --ok:#2C6A4E; --warn:#9A5520; --bad:#963232;
+  --shadow:0 1px 2px rgba(25,29,37,.05), 0 8px 24px -12px rgba(25,29,37,.18);
+  --display:"Zilla Slab", Georgia, serif;
+  --body:"Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --rail:274px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111419; --surface:#181C23; --surface-2:#1F242D;
+    --ink:#EDE8DC; --ink-2:#CBD2DC; --muted:#98A1B0; --faint:#6E7787;
+    --line:#282E38; --line-2:#39414E;
+    --gold:#CBB06A; --gold-bright:#B3A369; --gold-soft:#2A2617;
+    --navy:#8FB4D6; --navy-soft:#182430;
+    --ok:#6BBF92; --warn:#D69352; --bad:#E08585;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111419; --surface:#181C23; --surface-2:#1F242D;
+  --ink:#EDE8DC; --ink-2:#CBD2DC; --muted:#98A1B0; --faint:#6E7787;
+  --line:#282E38; --line-2:#39414E;
+  --gold:#CBB06A; --gold-bright:#B3A369; --gold-soft:#2A2617;
+  --navy:#8FB4D6; --navy-soft:#182430;
+  --ok:#6BBF92; --warn:#D69352; --bad:#E08585;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16.5px; line-height:1.62; -webkit-font-smoothing:antialiased;}
+a{color:var(--navy); text-underline-offset:3px; text-decoration-thickness:1px}
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+/* ---------- layout ---------- */
+.app{display:grid; grid-template-columns:var(--rail) minmax(0,1fr); align-items:start}
+#rail{position:sticky; top:0; height:100vh; display:flex; flex-direction:column; gap:14px;
+  border-right:1px solid var(--line); background:var(--surface); padding:20px 0 0}
+.brand{padding:0 18px; display:flex; gap:11px; align-items:baseline}
+.brand .mark{font-family:var(--mono); font-weight:700; font-size:12px; letter-spacing:.1em; color:var(--bg);
+  background:var(--navy); padding:4px 7px; border-radius:3px}
+.brand .nm{font-family:var(--display); font-weight:600; font-size:17px; letter-spacing:-.01em}
+.railtools{padding:0 18px; display:flex; flex-direction:column; gap:10px}
+#q{width:100%; font:inherit; font-size:14px; padding:8px 11px; border-radius:7px; color:var(--ink);
+  border:1px solid var(--line-2); background:var(--bg)}
+#q::placeholder{color:var(--faint)}
+.progwrap{display:flex; align-items:center; gap:10px}
+.progbar{flex:1; height:5px; border-radius:99px; background:var(--line); overflow:hidden}
+.progbar i{display:block; height:100%; width:0; background:var(--gold-bright); transition:width .3s}
+.progtxt{font-family:var(--mono); font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums}
+nav{overflow-y:auto; flex:1; padding:4px 10px 28px; scrollbar-width:thin}
+nav .unitlab{font-family:var(--mono); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--faint); padding:16px 8px 5px; display:flex; justify-content:space-between; align-items:center}
+nav a{display:flex; gap:8px; align-items:baseline; padding:4px 8px; border-radius:6px; font-size:14px;
+  color:var(--ink-2); text-decoration:none; line-height:1.35}
+nav a:hover{background:var(--surface-2); color:var(--ink)}
+nav a.on{background:var(--gold-soft); color:var(--ink); font-weight:600}
+nav a .dot{width:6px;height:6px;border-radius:99px;background:var(--line-2); flex:0 0 auto; margin-top:6px}
+nav a.done .dot{background:var(--ok)}
+.railfoot{border-top:1px solid var(--line); padding:10px 18px; display:flex; gap:8px; align-items:center}
+.tbtn{font:inherit; font-size:12.5px; cursor:pointer; background:none; border:1px solid var(--line-2);
+  color:var(--muted); border-radius:6px; padding:4px 9px}
+.tbtn:hover{color:var(--ink); border-color:var(--gold-bright)}
+
+main{min-width:0; padding:0 0 120px}
+.wrap{max-width:1120px; margin:0 auto; padding:0 40px}
+.col{max-width:74ch}
+
+/* ---------- hero ---------- */
+.hero{border-bottom:1px solid var(--line); background:
+  linear-gradient(180deg, var(--gold-soft), transparent 70%);}
+.hero .wrap{padding-top:56px; padding-bottom:40px}
+.eyebrow{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold)}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(34px,4.6vw,54px); line-height:1.04;
+  letter-spacing:-.022em; margin:.28em 0 .1em; text-wrap:balance}
+.dek{font-size:19px; color:var(--muted); max-width:62ch; margin:10px 0 0}
+.dek em{color:var(--ink-2); font-style:normal; font-weight:600}
+.facts{display:flex; flex-wrap:wrap; gap:0; margin-top:26px; border-top:1px solid var(--line-2)}
+.facts div{padding:12px 22px 4px 0; margin-right:22px; border-right:1px solid var(--line-2)}
+.facts div:last-child{border-right:0}
+.facts b{display:block; font-family:var(--mono); font-size:15px; color:var(--ink)}
+.facts span{font-size:12.5px; color:var(--faint); text-transform:uppercase; letter-spacing:.07em}
+
+/* ---------- sections ---------- */
+.unit{padding-top:22px}
+.unithead{padding:38px 0 8px; border-bottom:2px solid var(--ink); margin-bottom:4px;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap}
+.unithead h2{font-family:var(--display); font-weight:600; font-size:30px; letter-spacing:-.015em; margin:6px 0 8px}
+.unithead .tag{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold)}
+.unithead p{margin:0 0 10px; color:var(--muted); font-size:15px; max-width:56ch}
+.topic{padding:30px 0 10px; border-bottom:1px solid var(--line)}
+.topic > h3{font-family:var(--display); font-weight:600; font-size:23px; letter-spacing:-.012em;
+  margin:0 0 4px; display:flex; align-items:center; gap:10px; text-wrap:balance}
+.topic h4{font-family:var(--body); font-weight:700; font-size:15px; letter-spacing:.02em; color:var(--ink);
+  margin:22px 0 6px; text-transform:none}
+.topic h4::before{content:""; display:inline-block; width:14px; height:1px; background:var(--gold-bright);
+  vertical-align:middle; margin-right:8px}
+.topic p, .topic li{max-width:74ch}
+.topic p{margin:10px 0}
+.topic ul, .topic ol{margin:10px 0; padding-left:22px}
+.topic li{margin:5px 0}
+.lede{color:var(--ink-2); font-size:17.5px}
+.chk{appearance:none; width:17px; height:17px; border:1.5px solid var(--line-2); border-radius:4px;
+  cursor:pointer; flex:0 0 auto; background:var(--surface); position:relative; margin-left:auto}
+.chk:checked{background:var(--ok); border-color:var(--ok)}
+.chk:checked::after{content:"✓"; position:absolute; inset:0; color:#fff; font-size:12px; line-height:15px; text-align:center}
+.chk:hover{border-color:var(--gold-bright)}
+
+/* ---------- inline furniture ---------- */
+code, .m{font-family:var(--mono); font-size:.9em; background:var(--surface-2); padding:1px 5px;
+  border-radius:4px; border:1px solid var(--line)}
+.m{white-space:nowrap}
+.block{font-family:var(--mono); font-size:14px; line-height:1.75; background:var(--surface); border:1px solid var(--line);
+  border-left:3px solid var(--gold-bright); border-radius:0 8px 8px 0; padding:14px 16px; margin:14px 0;
+  overflow-x:auto; white-space:pre; color:var(--ink-2)}
+.block b{color:var(--ink); font-weight:700}
+.eq{font-family:var(--mono); font-size:15px; text-align:center; padding:14px 10px; margin:14px 0;
+  background:var(--surface-2); border-radius:8px; overflow-x:auto; color:var(--ink)}
+.eq small{display:block; font-family:var(--body); font-size:12.5px; color:var(--muted); margin-top:6px}
+.note{border-left:3px solid var(--navy); background:var(--navy-soft); padding:11px 15px; margin:16px 0;
+  border-radius:0 8px 8px 0; font-size:15px}
+.note.trap{border-color:var(--warn); background:color-mix(in srgb, var(--warn) 9%, var(--surface))}
+.note.key{border-color:var(--gold-bright); background:var(--gold-soft)}
+.note .lab{font-family:var(--mono); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+  display:block; margin-bottom:3px; color:var(--muted)}
+.note p{margin:4px 0}
+.tblwrap{overflow-x:auto; margin:16px 0; border:1px solid var(--line); border-radius:9px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:520px}
+th{text-align:left; font-family:var(--mono); font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); padding:10px 14px; border-bottom:1px solid var(--line-2); font-weight:500; vertical-align:bottom}
+td{padding:9px 14px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+td:first-child{color:var(--ink); font-weight:600}
+td.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+details.qa{border:1px solid var(--line); border-radius:9px; padding:0; margin:10px 0; background:var(--surface)}
+details.qa summary{cursor:pointer; padding:11px 15px; font-weight:600; font-size:15px; list-style:none;
+  display:flex; gap:10px; align-items:flex-start}
+details.qa summary::-webkit-details-marker{display:none}
+details.qa summary::before{content:"?"; font-family:var(--mono); font-size:11px; font-weight:700; color:var(--bg);
+  background:var(--gold); width:17px; height:17px; border-radius:99px; display:grid; place-items:center; flex:0 0 auto; margin-top:3px}
+details.qa[open] summary{border-bottom:1px solid var(--line)}
+details.qa .ans{padding:12px 15px 14px 42px; font-size:15px; color:var(--ink-2)}
+details.qa .ans p:first-child{margin-top:0}
+.pillrow{display:flex; flex-wrap:wrap; gap:7px; margin:12px 0}
+.pill{font-family:var(--mono); font-size:11.5px; letter-spacing:.04em; padding:3px 9px; border-radius:99px;
+  border:1px solid var(--line-2); color:var(--muted)}
+.pill.b{border-color:var(--gold-bright); color:var(--gold); background:var(--gold-soft)}
+.grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:16px; margin:16px 0}
+.mini{border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:var(--surface)}
+.mini h5{margin:0 0 6px; font-size:14px; font-family:var(--body); font-weight:700}
+.mini p{margin:0; font-size:14.5px; color:var(--muted)}
+.mini ul{margin:6px 0 0; padding-left:18px; font-size:14.5px; color:var(--muted)}
+
+/* ---------- demos ---------- */
+.demo{border:1px solid var(--line-2); border-radius:12px; background:var(--surface); margin:20px 0;
+  box-shadow:var(--shadow); overflow:hidden}
+.demo header{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:11px 16px; border-bottom:1px solid var(--line); background:var(--surface-2)}
+.demo header h5{margin:0; font-family:var(--mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.demo .body{padding:16px}
+.demo canvas{width:100%; display:block; border-radius:8px; background:var(--bg); border:1px solid var(--line)}
+.ctl{display:flex; flex-wrap:wrap; gap:14px 20px; align-items:center; margin-top:14px}
+.ctl label{font-size:13px; color:var(--muted); display:flex; align-items:center; gap:9px}
+.ctl output{font-family:var(--mono); font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; min-width:3.2em}
+input[type=range]{accent-color:var(--gold-bright); width:130px}
+.btn{font:inherit; font-size:13.5px; cursor:pointer; padding:5px 13px; border-radius:7px; border:1px solid var(--line-2);
+  background:var(--surface); color:var(--ink)}
+.btn:hover{border-color:var(--gold-bright); background:var(--gold-soft)}
+.btn.p{background:var(--navy); color:var(--bg); border-color:var(--navy)}
+.btn.p:hover{opacity:.88; background:var(--navy)}
+.readout{font-family:var(--mono); font-size:12.5px; color:var(--muted); margin-top:10px; font-variant-numeric:tabular-nums}
+
+/* ---------- flashcards ---------- */
+.deckbar{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0}
+.card{position:relative; min-height:230px; border-radius:14px; border:1px solid var(--line-2); background:var(--surface);
+  box-shadow:var(--shadow); padding:30px 34px; display:flex; flex-direction:column; justify-content:center; cursor:pointer}
+.card .side{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
+  position:absolute; top:14px; left:34px}
+.card .txt{font-size:19px; line-height:1.5; text-wrap:balance}
+.card .txt.a{font-size:16.5px; color:var(--ink-2)}
+.card .hint{position:absolute; bottom:14px; left:34px; font-size:12.5px; color:var(--faint)}
+.cardnav{display:flex; align-items:center; gap:12px; margin-top:12px}
+.cardnav .pos{font-family:var(--mono); font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+
+/* ---------- search ---------- */
+body.searching .unit > .unithead, body.searching .hero{opacity:.45}
+.topic.hide{display:none}
+.unit.hide{display:none}
+#nores{display:none; padding:40px 0; color:var(--muted)}
+body.searching #nores.on{display:block}
+mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(--gold-bright); padding:0 1px}
+
+@media(max-width:1000px){
+  .app{grid-template-columns:1fr}
+  #rail{position:static; height:auto; border-right:0; border-bottom:1px solid var(--line)}
+  nav{max-height:230px}
+  .wrap{padding:0 22px}
+}
+</style>
+
+</head><body><div class="app">
+<aside id="rail">
+  <div class="brand"><span class="mark">7641</span><span class="nm">Machine Bench</span></div>
+  <div class="railtools">
+    <input id="q" type="search" placeholder="Search all topics…" autocomplete="off">
+    <div class="progwrap"><div class="progbar"><i id="pbar"></i></div><span class="progtxt" id="ptxt">0/0</span></div>
+  </div>
+  <nav id="toc"></nav>
+  <div class="railfoot">
+    <button class="tbtn" id="themeb">Theme</button>
+    <button class="tbtn" id="resetb">Reset progress</button>
+  </div>
+</aside>
+
+<main>
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Georgia Tech OMSCS · CS 7641</div>
+  <h1>Machine learning, worked all the way down</h1>
+  <p class="dek">A review bench for Isbell &amp; Littman's four units — <em>supervised learning</em>, <em>randomized optimization</em>, <em>unsupervised learning</em>, <em>reinforcement learning</em>. Derivations you can reproduce on paper, the pitfalls that cost report points, and live widgets for the algorithms that only make sense in motion.</p>
+  <div class="facts">
+    <div><b>4</b><span>units</span></div>
+    <div><b>32</b><span>topics</span></div>
+    <div><b>6</b><span>live demos</span></div>
+    <div><b>60+</b><span>flashcards</span></div>
+    <div><b>Mitchell</b><span>+ Sutton &amp; Barto</span></div>
+  </div>
+</div></header>
+<div class="wrap">
+<div id="nores">No topic matches that. Try a shorter term — <code>VC</code>, <code>kernel</code>, <code>Bellman</code>.</div>
+<section class="unit" id="u0" data-unit="Foundations">
+<div class="unithead"><div>
+  <div class="tag">Unit 0 · cross-cutting</div>
+  <h2>Foundations you are graded on everywhere</h2>
+  <p>Every report in this course is really an argument about bias, variance and evidence. Get these five ideas exact and the other three units become bookkeeping.</p>
+</div></div>
+
+<article class="topic" id="t-ml-def">
+<h3>What "learning" means here</h3>
+<p class="lede">Mitchell's definition is the one the course leans on: a program learns from experience <span class="m">E</span> with respect to task <span class="m">T</span> and performance measure <span class="m">P</span> if its performance at <span class="m">T</span>, measured by <span class="m">P</span>, improves with <span class="m">E</span>. Every design decision you make in an assignment is a choice of one of those three letters.</p>
+<p>Isbell and Littman frame the whole course as <b>generalization</b>, not memorization: induction from examples to a function that behaves on data you have never seen. The three families map cleanly onto what supervision you are given:</p>
+<div class="tblwrap"><table>
+<tr><th>Family</th><th>Given</th><th>Sought</th><th>The real question</th></tr>
+<tr><td>Supervised</td><td>Pairs <span class="m">(x, y)</span></td><td>Function approximation</td><td>Which of the infinitely many consistent functions do I prefer?</td></tr>
+<tr><td>Unsupervised</td><td>Only <span class="m">x</span></td><td>Compact description</td><td>What structure justifies calling two points "the same"?</td></tr>
+<tr><td>Reinforcement</td><td>States, actions, delayed scalar reward</td><td>Policy</td><td>Which action now, given that the payoff arrives much later?</td></tr>
+</table></div>
+<div class="note key"><span class="lab">Say it this way in a report</span><p>"Induction is under-determined; the learner's <b>inductive bias</b> is what breaks the tie." That single sentence is the through-line of Unit 1, and graders reward candidates who use it to explain <em>why</em> two algorithms disagree on the same data instead of merely reporting that they do.</p></div>
+</article>
+
+<article class="topic" id="t-bias">
+<h3>Inductive bias: restriction vs preference</h3>
+<p>A hypothesis space <span class="m">H</span> plus a search order is a bias. Split it in two — the distinction shows up in almost every exam question:</p>
+<ul>
+<li><b>Restriction bias</b> — what <span class="m">H</span> can represent at all. Linear regression restricts you to hyperplanes; a depth-1 tree restricts you to axis-aligned single splits.</li>
+<li><b>Preference bias</b> — which hypothesis inside <span class="m">H</span> the algorithm reaches first. ID3 prefers shorter trees with high-information-gain attributes near the root; backprop prefers small weights and smooth functions because it starts small and moves by gradient.</li>
+</ul>
+<div class="tblwrap"><table>
+<tr><th>Algorithm</th><th>Restriction bias</th><th>Preference bias</th></tr>
+<tr><td>Decision tree (ID3)</td><td>All discrete functions (unrestricted for discrete inputs); axis-parallel splits</td><td>Short trees, high info-gain attributes at top, correct over incorrect</td></tr>
+<tr><td>k-NN</td><td>Nothing excluded — any function representable in the limit</td><td>Locality: near points have similar labels; all features matter equally (in Euclidean distance); smoothness</td></tr>
+<tr><td>Neural net</td><td>Very little; boolean, continuous, arbitrary (given enough units/layers)</td><td>Smooth interpolation, low-complexity/small-weight solutions first</td></tr>
+<tr><td>Linear SVM</td><td>Hyperplanes (in the kernel-induced space)</td><td>Maximum margin — the single most "confident" separator</td></tr>
+<tr><td>Naive Bayes</td><td>Products of per-attribute conditionals</td><td>MAP hypothesis under conditional independence</td></tr>
+</table></div>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Writing "k-NN has no bias because it is non-parametric." It has a very strong preference bias — the locality/smoothness assumption plus equal feature weighting — and that assumption is exactly what the curse of dimensionality destroys.</p></div>
+<details class="qa"><summary>Two learners fit the training set perfectly but disagree on a new point. What explains the disagreement?</summary><div class="ans"><p>Only the inductive bias. The data alone cannot distinguish them — both are consistent hypotheses. The difference must come from their restriction bias (one cannot represent what the other does) or preference bias (both could represent both answers, but their search reaches different ones first).</p></div></details>
+</article>
+
+<article class="topic" id="t-biasvar">
+<h3>Bias–variance decomposition, and how to read a learning curve</h3>
+<p>For squared loss with target <span class="m">y = f(x) + ε</span>, <span class="m">Var(ε) = σ²</span>, the expected error of a learner trained on random training sets decomposes exactly:</p>
+<div class="eq">E[(y − ĥ(x))²] = (E[ĥ(x)] − f(x))² + E[(ĥ(x) − E[ĥ(x)])²] + σ²<small>bias² &nbsp;+&nbsp; variance &nbsp;+&nbsp; irreducible noise</small></div>
+<p><b>Bias</b> is error from a hypothesis space too small or too rigid to contain the truth — it does not shrink with more data. <b>Variance</b> is sensitivity to which training sample you happened to draw — it does shrink with more data. This is why the two diagnostic curves say different things:</p>
+<div class="grid2">
+<div class="mini"><h5>Model-complexity curve (x = complexity)</h5><ul><li>Train error falls monotonically.</li><li>CV error is U-shaped.</li><li>Left of the minimum: underfit / high bias.</li><li>Right of the minimum: overfit / high variance.</li></ul></div>
+<div class="mini"><h5>Learning curve (x = training-set size)</h5><ul><li>Curves converge high and flat → <b>high bias</b>; more data will not help, change the model.</li><li>Wide persistent gap, CV still descending → <b>high variance</b>; more data (or regularization) will help.</li></ul></div>
+</div>
+<div class="note"><span class="lab">Assignment 1 tactic</span><p>Every SL report wants both curve types per algorithm per dataset. Plot them with error bars over folds or seeds, and write the sentence the plot supports — "the gap does not close by 100% of the data, so this is variance, which is why pruning at depth 6 improves CV by 4 points." Plots without that sentence are what "insufficient analysis" means in the rubric.</p></div>
+</article>
+
+<article class="topic" id="t-info">
+<h3>Information theory in one page</h3>
+<p>Entropy is the expected number of bits to encode a draw from <span class="m">P</span>; everything else in the unit is arithmetic on it.</p>
+<div class="eq">H(X) = − Σ<sub>x</sub> P(x) log₂ P(x) &nbsp;&nbsp;·&nbsp;&nbsp; H(X|Y) = Σ<sub>y</sub> P(y) H(X | Y=y)<br>I(X;Y) = H(X) − H(X|Y) = H(X) + H(Y) − H(X,Y)<small>Mutual information is symmetric, non-negative, and zero exactly when X ⫫ Y</small></div>
+<p>Two facts worth memorizing: entropy of a binary variable is maximal (1 bit) at <span class="m">p = 0.5</span> and 0 at <span class="m">p ∈ {0,1}</span>; and <b>KL divergence</b> <span class="m">D(P‖Q) = Σ P(x) log(P(x)/Q(x))</span> is non-negative, zero iff <span class="m">P = Q</span>, and <b>not symmetric</b> — so it is a divergence, not a distance. KL is the objective behind MIMIC's dependency-tree projection and behind maximum-likelihood fitting generally.</p>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Calling KL a metric. It fails symmetry and the triangle inequality. Also: information gain is mutual information between the attribute and the label — saying so out loud connects Unit 1 to Unit 3's feature selection and earns credit.</p></div>
+<div class="demo" id="d-entropy"><header><h5>Binary entropy &amp; information gain</h5><span class="readout" id="ent-read"></span></header><div class="body">
+<canvas id="ent-cv" height="240"></canvas>
+<div class="ctl">
+<label>P(+) in parent <input type="range" id="ent-p" min="1" max="99" value="50"><output id="ent-po">0.50</output></label>
+<label>Split sends <output id="ent-fo">50%</output> left <input type="range" id="ent-f" min="5" max="95" value="50"></label>
+<label>P(+) left <input type="range" id="ent-l" min="0" max="100" value="90"><output id="ent-lo">0.90</output></label>
+</div>
+<div class="readout" id="ent-out"></div>
+</div></div>
+</article>
+
+<article class="topic" id="t-eval">
+<h3>Evaluation you can defend</h3>
+<p>The test set is a one-shot instrument. Every choice you make after looking at it leaks. The defensible pipeline:</p>
+<div class="block"><b>split</b> train / test once, stratified, fixed seed
+<b>tune</b> hyper-parameters by k-fold CV <i>inside</i> train only (k = 5 or 10)
+<b>refit</b> best config on all of train
+<b>report</b> once on test — and report the CV variance, not just the mean</div>
+<ul>
+<li><b>Stratify</b> when classes are imbalanced, and stop quoting accuracy there: a 95/5 split makes "always negative" look 95% right. Use F1, balanced accuracy, ROC-AUC or PR-AUC, and say which and why.</li>
+<li><b>Nested CV</b> (outer loop for estimation, inner for tuning) when you need an unbiased estimate of the whole tuning procedure — worth one sentence in a report even if you only run flat CV.</li>
+<li><b>Wall-clock</b> is a first-class result in this course: fit time and query time separate the eager learners (trees, SVM, nets) from the lazy one (k-NN), and the graders look for it.</li>
+</ul>
+<div class="tblwrap"><table>
+<tr><th>Metric</th><th>Definition</th><th>Use it when</th></tr>
+<tr><td>Precision</td><td class="num">TP / (TP + FP)</td><td>False alarms are expensive</td></tr>
+<tr><td>Recall</td><td class="num">TP / (TP + FN)</td><td>Misses are expensive</td></tr>
+<tr><td>F1</td><td class="num">2PR / (P + R)</td><td>One number, imbalanced classes</td></tr>
+<tr><td>ROC-AUC</td><td>P(score of random + &gt; random −)</td><td>Ranking quality, roughly balanced classes</td></tr>
+<tr><td>PR-AUC</td><td>Area under precision–recall</td><td>Heavy imbalance; ROC looks flatteringly good there</td></tr>
+</table></div>
+</article>
+</section>
+
+
+<section class="unit" id="u1" data-unit="Supervised">
+<div class="unithead"><div>
+  <div class="tag">Unit 1 · assignment 1 &amp; the SL report</div>
+  <h2>Supervised learning</h2>
+  <p>Function approximation from labelled examples. Five algorithm families, one theory chapter, and one Bayesian chapter that quietly explains all of them.</p>
+</div></div>
+
+<article class="topic" id="t-dt">
+<h3>Decision trees &amp; ID3</h3>
+<p class="lede">A tree is a sequence of questions; learning one is choosing the order of the questions. ID3 is greedy and top-down: pick the attribute with the highest information gain, split, recurse.</p>
+<div class="block"><b>ID3</b>(Examples, Target, Attributes)
+  if all Examples have same label → return leaf(label)
+  if Attributes empty → return leaf(majority label)
+  A ← argmax<sub>a ∈ Attributes</sub> Gain(Examples, a)
+  root ← A
+  for each value v of A:
+      S<sub>v</sub> ← {e ∈ Examples : e.A = v}
+      if S<sub>v</sub> empty → child = leaf(majority label of Examples)
+      else child = ID3(S<sub>v</sub>, Target, Attributes − {A})
+  return root</div>
+<div class="eq">Gain(S, A) = H(S) − Σ<sub>v ∈ values(A)</sub> (|S<sub>v</sub>|/|S|) · H(S<sub>v</sub>)<small>= I(label ; A) — the entropy you expect to remove by asking A</small></div>
+<h4>The properties you must be able to state</h4>
+<ul>
+<li><b>Greedy, no backtracking</b> — reaches a locally good tree, not the globally shortest one; finding the optimal tree is NP-hard.</li>
+<li><b>Bias</b>: restriction = axis-parallel splits (so an XOR-in-two-continuous-features boundary needs a staircase); preference = short trees, informative attributes at the top.</li>
+<li><b>Gain is biased toward many-valued attributes</b> — a unique ID column has maximal gain and zero generalization. Fix with <b>gain ratio</b> (divide by the split's own entropy, C4.5) or Gini impurity.</li>
+<li><b>Continuous attributes</b> get thresholded: sort values, consider midpoints where the label changes. An attribute can be reused down a path (unlike discrete ID3, where it is exhausted).</li>
+<li><b>Overfitting control</b>: pre-pruning (max depth, min samples per leaf, gain threshold) or post-pruning (grow full, then <b>reduced-error pruning</b> against a validation set, or rule post-pruning). Post-pruning is generally stronger because early stopping can miss a split that only pays off in combination.</li>
+</ul>
+<div class="eq">Gini(S) = 1 − Σ<sub>i</sub> p<sub>i</sub>² &nbsp;&nbsp;vs&nbsp;&nbsp; H(S) = − Σ<sub>i</sub> p<sub>i</sub> log₂ p<sub>i</sub><small>Both peak at the uniform distribution; Gini is cheaper (no log) and nearly always picks the same split</small></div>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Saying deeper trees are "more accurate." Deeper trees have <em>lower training error</em> and higher variance. In a report, the depth-vs-CV-error curve is the evidence; the sentence is "past depth d the tree begins fitting sample-specific noise, and CV error rises while train error goes to zero."</p></div>
+<details class="qa"><summary>Why can a decision tree represent any boolean function, and what does that cost?</summary><div class="ans"><p>With enough depth you can enumerate every row of the truth table as a root-to-leaf path — so the restriction bias for discrete inputs is essentially none. The cost is size: parity/XOR over <span class="m">n</span> attributes needs <span class="m">O(2ⁿ)</span> nodes because no single attribute has any information gain on its own, so the greedy heuristic is also blind at the root.</p></div></details>
+</article>
+
+<article class="topic" id="t-knn">
+<h3>Instance-based learning: k-NN</h3>
+<p class="lede">Lazy learning: keep the data, defer all work to query time. There is no model — the training set <em>is</em> the model.</p>
+<div class="tblwrap"><table>
+<tr><th></th><th>Lazy (k-NN)</th><th>Eager (tree, net, SVM)</th></tr>
+<tr><td>Training cost</td><td class="num">O(1) — store</td><td>Expensive</td></tr>
+<tr><td>Query cost</td><td class="num">O(nd) per query (brute force)</td><td class="num">Cheap, ~O(depth) or O(#SV)</td></tr>
+<tr><td>Memory</td><td>All n points</td><td>Parameters only</td></tr>
+<tr><td>Adapting to new data</td><td>Free</td><td>Retrain</td></tr>
+</table></div>
+<h4>The knobs, and what each one is really choosing</h4>
+<ul>
+<li><b>k</b> — the bias/variance dial. <span class="m">k = 1</span>: zero training error, jagged boundary, high variance. Large <span class="m">k</span>: smooth, high bias, and at <span class="m">k = n</span> you predict the global majority. Odd <span class="m">k</span> avoids ties in binary problems.</li>
+<li><b>Distance metric</b> — this <em>is</em> the domain knowledge. Euclidean assumes every feature matters equally and is on the same scale, so <b>you must standardize features</b>; Manhattan is less sensitive to a single wild coordinate; a weighted or learned metric encodes what you know.</li>
+<li><b>Weighting</b> — distance-weighted voting (<span class="m">w<sub>i</sub> = 1/d<sub>i</sub>²</span>) lets you take large <span class="m">k</span> without letting far points dominate; it is the discrete cousin of locally weighted regression.</li>
+</ul>
+<h4>Curse of dimensionality</h4>
+<p>To keep a fixed density of samples, the number of points needed grows exponentially in the number of features: covering <span class="m">[0,1]<sup>d</sup></span> at resolution <span class="m">1/10</span> takes <span class="m">10<sup>d</sup></span> cells. Worse, in high <span class="m">d</span> the ratio of nearest to farthest distance approaches 1 — every point is roughly equidistant, so "nearest neighbour" stops meaning anything. This is the direct bridge to Unit 3: feature selection and PCA/ICA exist largely to make locality meaningful again.</p>
+<div class="note key"><span class="lab">Exam sentence</span><p>"k-NN's preference bias is that nearby points have similar labels and that all features contribute equally to nearness. Both halves fail in high dimensions, which is why dimensionality reduction helps k-NN far more than it helps trees."</p></div>
+<div class="demo" id="d-knn"><header><h5>k-NN decision boundary — drag k, watch variance</h5><button class="btn" id="knn-new">New sample</button></header><div class="body">
+<canvas id="knn-cv" height="320"></canvas>
+<div class="ctl">
+<label>k <input type="range" id="knn-k" min="1" max="31" step="2" value="1"><output id="knn-ko">1</output></label>
+<label>label noise <input type="range" id="knn-n" min="0" max="30" value="8"><output id="knn-no">8%</output></label>
+<label><input type="checkbox" id="knn-w"> distance-weighted</label>
+</div>
+<div class="readout" id="knn-out"></div>
+</div></div>
+</article>
+
+<article class="topic" id="t-nn">
+<h3>Neural networks &amp; backpropagation</h3>
+<p class="lede">A perceptron computes <span class="m">ŷ = step(w·x + b)</span> — a hyperplane. Stacking them with a differentiable nonlinearity turns a linear separator into a universal function approximator, and gradient descent does the credit assignment.</p>
+<h4>Two learning rules that are constantly confused</h4>
+<div class="tblwrap"><table>
+<tr><th></th><th>Perceptron rule</th><th>Delta / LMS rule</th></tr>
+<tr><td>Update</td><td class="num">Δw = η(y − ŷ)x</td><td class="num">Δw = η(y − w·x)x</td></tr>
+<tr><td>Output used</td><td>Thresholded ŷ</td><td>Unthresholded activation</td></tr>
+<tr><td>Guarantee</td><td>Converges in finite steps <b>if data are linearly separable</b></td><td>Converges asymptotically to the min-squared-error solution <b>even if not separable</b></td></tr>
+<tr><td>Surface</td><td>No gradient (step is not differentiable)</td><td>Gradient descent on a convex quadratic</td></tr>
+</table></div>
+<h4>Backprop in five lines</h4>
+<div class="block">forward:  a<sup>(l)</sup> = σ(z<sup>(l)</sup>),  z<sup>(l)</sup> = W<sup>(l)</sup>a<sup>(l−1)</sup> + b<sup>(l)</sup>
+output δ: δ<sup>(L)</sup> = ∇<sub>a</sub>E ⊙ σ′(z<sup>(L)</sup>)
+backward: δ<sup>(l)</sup> = (W<sup>(l+1)ᵀ</sup> δ<sup>(l+1)</sup>) ⊙ σ′(z<sup>(l)</sup>)
+gradient: ∂E/∂W<sup>(l)</sup> = δ<sup>(l)</sup> a<sup>(l−1)ᵀ</sup>
+update:   W ← W − η ∂E/∂W        (chain rule, reused bottom-up)</div>
+<p>With sigmoid <span class="m">σ(z) = 1/(1+e<sup>−z</sup>)</span>, <span class="m">σ′ = σ(1−σ) ≤ 0.25</span> — multiply that through many layers and the gradient vanishes, which is the historical reason for ReLU (<span class="m">σ′ ∈ {0,1}</span>).</p>
+<h4>Properties</h4>
+<ul>
+<li><b>Restriction bias</b>: almost none. One hidden layer with enough sigmoid units approximates any continuous function on a compact domain; two layers handle arbitrary functions. So representation is not your problem — <em>search</em> is.</li>
+<li><b>Preference bias</b>: small random initial weights + gradient descent ⇒ simpler, smoother functions found first. This is why <b>early stopping regularizes</b>: you stop while the function is still simple.</li>
+<li><b>Non-convex</b> error surface: local optima, plateaus. Mitigations are the Unit 2 toolkit — momentum, random restarts, simulated annealing, and (in assignment 2) replacing backprop entirely with RHC/SA/GA on the weight vector.</li>
+<li><b>Overfitting control</b>: fewer/smaller units, weight decay (L2 = a Gaussian prior on weights), dropout, early stopping on a validation split.</li>
+</ul>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Claiming backprop "finds the global optimum." It finds a local optimum of a non-convex surface, and its trajectory — not just its endpoint — is the preference bias. Also: standardize inputs, or the network spends its early epochs undoing feature scale.</p></div>
+</article>
+
+<article class="topic" id="t-svm">
+<h3>Support vector machines &amp; kernels</h3>
+<p class="lede">Of all separating hyperplanes, take the one furthest from both classes. Maximizing the margin is the preference bias, and it is what makes the solution depend on only a handful of points.</p>
+<div class="eq">maximize margin 2/‖w‖ &nbsp;⟺&nbsp; min ½‖w‖² &nbsp;s.t. y<sub>i</sub>(w·x<sub>i</sub> + b) ≥ 1<small>Soft margin: min ½‖w‖² + C Σξ<sub>i</sub>, with slack ξ<sub>i</sub> ≥ 0 for points inside the margin or misclassified</small></div>
+<p>The Lagrangian dual is where the magic lives:</p>
+<div class="eq">max<sub>α</sub> Σ<sub>i</sub> α<sub>i</sub> − ½ Σ<sub>i,j</sub> α<sub>i</sub>α<sub>j</sub> y<sub>i</sub>y<sub>j</sub> ⟨x<sub>i</sub>, x<sub>j</sub>⟩ &nbsp;s.t. α<sub>i</sub> ≥ 0, Σα<sub>i</sub>y<sub>i</sub> = 0<small>The data appear only as inner products — replace ⟨·,·⟩ with K(·,·) and you have the kernel trick</small></div>
+<p>Most <span class="m">α<sub>i</sub></span> are zero; the points with <span class="m">α<sub>i</sub> &gt; 0</span> are the <b>support vectors</b> — they lie on or inside the margin and alone determine the boundary. Delete every other training point and you get the identical classifier.</p>
+<h4>Kernels</h4>
+<div class="tblwrap"><table>
+<tr><th>Kernel</th><th>Form</th><th>Notes</th></tr>
+<tr><td>Linear</td><td class="num">xᵀz</td><td>Baseline; fast; use when d ≫ n</td></tr>
+<tr><td>Polynomial</td><td class="num">(xᵀz + c)<sup>p</sup></td><td>Feature space = all monomials up to degree p</td></tr>
+<tr><td>RBF / Gaussian</td><td class="num">exp(−γ‖x − z‖²)</td><td>Infinite-dimensional feature space; large γ ⇒ narrow, wiggly, high variance</td></tr>
+<tr><td>Sigmoid</td><td class="num">tanh(κ xᵀz + θ)</td><td>Not PSD for all parameters</td></tr>
+</table></div>
+<p>A valid kernel must satisfy <b>Mercer's condition</b>: the Gram matrix <span class="m">K<sub>ij</sub> = K(x<sub>i</sub>, x<sub>j</sub>)</span> must be symmetric positive semi-definite — that guarantees an implicit feature map <span class="m">φ</span> with <span class="m">K(x,z) = ⟨φ(x), φ(z)⟩</span> exists, so you never compute <span class="m">φ</span>.</p>
+<div class="grid2">
+<div class="mini"><h5>C — the slack penalty</h5><p>Small C: wide margin, more violations tolerated, higher bias. Large C: hard margin, fits training data tightly, higher variance. C and γ interact — tune them on a 2-D grid, and say so.</p></div>
+<div class="mini"><h5>γ — RBF width</h5><p>Small γ: broad kernels, near-linear boundary. Large γ: each support vector influences only its immediate neighbourhood and the SVM degenerates toward 1-NN.</p></div>
+</div>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Two traps. (1) Not scaling features — RBF distances are meaningless with mixed units. (2) Claiming the kernel "maps data to higher dimensions and then computes there." It never computes there; the whole point is that only inner products are needed.</p></div>
+<details class="qa"><summary>Why is max-margin a sensible preference bias at all?</summary><div class="ans"><p>Two arguments the course accepts. Geometrically, the margin is the distance to the closest data, so it is the separator most tolerant to perturbation of any single point. Theoretically, generalization bounds for SVMs depend on the margin rather than on the dimension of the feature space — which is how an infinite-dimensional RBF space can still generalize. The same margin story reappears in boosting.</p></div></details>
+</article>
+
+<article class="topic" id="t-ens">
+<h3>Ensembles: bagging &amp; boosting</h3>
+<p class="lede">Combine many weak rules into one strong one. Bagging attacks variance; boosting attacks bias — and that difference is the most-asked ensemble question in this course.</p>
+<div class="tblwrap"><table>
+<tr><th></th><th>Bagging (bootstrap aggregating)</th><th>Boosting (AdaBoost)</th></tr>
+<tr><td>Data for each learner</td><td>Uniform resample with replacement</td><td>Reweighted — hard examples get heavier</td></tr>
+<tr><td>Learners built</td><td>Independently → parallelizable</td><td>Sequentially, each fixes the last</td></tr>
+<tr><td>Combination</td><td>Uniform vote / average</td><td>Weighted vote by learner accuracy</td></tr>
+<tr><td>Primarily reduces</td><td>Variance</td><td>Bias</td></tr>
+<tr><td>Base learner wants to be</td><td>Low bias, high variance (deep trees)</td><td>Weak: slightly better than chance (stumps)</td></tr>
+<tr><td>Noise sensitivity</td><td>Robust</td><td><b>Fragile</b> — mislabelled points get exponentially upweighted</td></tr>
+</table></div>
+<h4>AdaBoost, exactly</h4>
+<div class="block">D<sub>1</sub>(i) = 1/n
+for t = 1..T:
+    h<sub>t</sub> ← weak learner trained on D<sub>t</sub>
+    ε<sub>t</sub> = Σ<sub>i</sub> D<sub>t</sub>(i)·[h<sub>t</sub>(x<sub>i</sub>) ≠ y<sub>i</sub>]
+    α<sub>t</sub> = ½ ln((1 − ε<sub>t</sub>)/ε<sub>t</sub>)
+    D<sub>t+1</sub>(i) = D<sub>t</sub>(i)·exp(−α<sub>t</sub> y<sub>i</sub> h<sub>t</sub>(x<sub>i</sub>)) / Z<sub>t</sub>
+H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
+<p>Read the two formulas: <span class="m">α<sub>t</sub></span> goes to 0 as <span class="m">ε<sub>t</sub> → ½</span> (a coin flip gets no vote) and grows without bound as <span class="m">ε<sub>t</sub> → 0</span>. The reweighting multiplies by <span class="m">e<sup>−α</sup></span> on correct points and <span class="m">e<sup>+α</sup></span> on errors, so the next learner sees a distribution concentrated where the ensemble is currently wrong.</p>
+<h4>Why boosting often does not overfit</h4>
+<p>Training error hits zero and test error keeps <em>falling</em> — the classic curve. The explanation the course gives is <b>margins</b>: even after every point is classified correctly, additional rounds keep pushing points further from the boundary, increasing the confidence margin, and the generalization bound depends on the margin distribution, not on <span class="m">T</span>. The exception, which you should always name in the same breath: <b>with noisy or mislabelled data boosting does overfit</b>, because it will spend unbounded weight trying to fit points that are simply wrong.</p>
+<div class="note key"><span class="lab">Assignment 1 tactic</span><p>Run boosted stumps against a single pruned tree on both datasets and plot test error vs number of weak learners. If one dataset has label noise, you get the textbook contrast — one curve keeps improving, the other turns up — and that contrast, explained via margins and noise, is a full analysis paragraph.</p></div>
+<details class="qa"><summary>Why do you boost stumps rather than fully-grown trees?</summary><div class="ans"><p>Boosting's guarantee assumes a <em>weak</em> learner — one that beats chance on any weighting. A fully grown tree already has near-zero training error on the first round, so <span class="m">ε₁ ≈ 0</span>, <span class="m">α₁</span> explodes, the distribution barely changes and there is nothing left for later rounds to correct; you get one high-variance tree with extra steps. Weak learners leave residual error for the sequence to work on, and boosting reduces bias by summing many of them.</p></div></details>
+</article>
+
+<article class="topic" id="t-clt">
+<h3>Computational learning theory: PAC &amp; VC</h3>
+<p class="lede">The unit that asks not "does it work?" but "how many examples before it must work?" Learn the three inputs, the two bounds, and what VC dimension means operationally.</p>
+<p>The setting: a concept class <span class="m">C</span>, hypothesis space <span class="m">H</span>, unknown target <span class="m">c ∈ C</span>, examples drawn i.i.d. from a fixed but unknown <span class="m">D</span>. True error <span class="m">error<sub>D</sub>(h) = Pr<sub>x∼D</sub>[h(x) ≠ c(x)]</span>.</p>
+<div class="note"><span class="lab">PAC — probably approximately correct</span><p>A learner PAC-learns <span class="m">C</span> if for any <span class="m">ε, δ</span> it outputs, with probability at least <span class="m">1 − δ</span>, a hypothesis with error at most <span class="m">ε</span>, in time and samples polynomial in <span class="m">1/ε</span>, <span class="m">1/δ</span> and problem size. <em>Approximately</em> = the <span class="m">ε</span>; <em>probably</em> = the <span class="m">δ</span>.</p></div>
+<div class="eq">Finite H, consistent learner (Haussler):&nbsp; m ≥ (1/ε)(ln|H| + ln(1/δ))<br>Agnostic (best h may still err):&nbsp; m ≥ (1/2ε²)(ln|H| + ln(1/δ))<br>Infinite H:&nbsp; m ≥ (1/ε)(8·VC(H)·log₂(13/ε) + 4·log₂(2/δ))<small>Note the ε → ε² penalty when you drop the realizability assumption</small></div>
+<h4>VC dimension</h4>
+<p>The largest number of points that <span class="m">H</span> can <b>shatter</b> — i.e. for which <em>some</em> arrangement of that many points can be labelled in all <span class="m">2<sup>d</sup></span> ways by members of <span class="m">H</span>. To prove <span class="m">VC(H) = d</span> you must do two things: exhibit one set of <span class="m">d</span> points that is shattered, and argue that <em>no</em> set of <span class="m">d+1</span> points can be.</p>
+<div class="tblwrap"><table>
+<tr><th>Hypothesis class</th><th>VC dimension</th></tr>
+<tr><td>Thresholds on a line <span class="m">x ≥ a</span></td><td class="num">1</td></tr>
+<tr><td>Intervals <span class="m">[a,b]</span> on a line</td><td class="num">2</td></tr>
+<tr><td>Linear separators in <span class="m">ℝ<sup>d</sup></span></td><td class="num">d + 1</td></tr>
+<tr><td>Axis-aligned rectangles in the plane</td><td class="num">4</td></tr>
+<tr><td>Convex polygons in the plane</td><td class="num">∞</td></tr>
+<tr><td>Finite <span class="m">H</span></td><td class="num">≤ log₂|H|</td></tr>
+</table></div>
+<p>A class is PAC-learnable iff its VC dimension is finite. Sanity check the direction of every term: more accuracy (small <span class="m">ε</span>), more confidence (small <span class="m">δ</span>) and richer <span class="m">H</span> (large VC) all <em>increase</em> the sample requirement.</p>
+<div class="note trap"><span class="lab">Where points get lost</span><p>"Shatters <span class="m">d</span> points" means <em>there exists</em> a set of size <span class="m">d</span> that can be labelled every way — not <em>every</em> set. Three collinear points cannot be shattered by a line, but VC of a linear separator in the plane is still 3, because a triangle can.</p></div>
+<details class="qa"><summary>What are mistake bounds, and how do they differ from PAC?</summary><div class="ans"><p>Mistake-bound analysis is online: examples arrive one at a time, the learner predicts, then sees the truth, and you count total mistakes over the whole (possibly adversarial) sequence — no distributional assumption at all. PAC is batch and distributional. The canonical results: the halving algorithm makes at most <span class="m">log₂|H|</span> mistakes, and weighted majority makes <span class="m">O(log n + m)</span> where <span class="m">m</span> is the best expert's mistake count.</p></div></details>
+</article>
+
+<article class="topic" id="t-bayes">
+<h3>Bayesian learning &amp; Naive Bayes</h3>
+<p class="lede">Reframe learning as inference over hypotheses: instead of searching for a good <span class="m">h</span>, ask what the data does to your belief about all of them.</p>
+<div class="eq">P(h | D) = P(D | h) · P(h) / P(D)<small>posterior ∝ likelihood × prior</small></div>
+<ul>
+<li><b>MAP</b>: <span class="m">h<sub>MAP</sub> = argmax<sub>h</sub> P(D|h)P(h)</span>.</li>
+<li><b>ML</b>: <span class="m">h<sub>ML</sub> = argmax<sub>h</sub> P(D|h)</span> — MAP with a uniform prior.</li>
+<li><b>Bayes optimal classifier</b>: don't pick a hypothesis at all; vote them all, weighted by posterior — <span class="m">argmax<sub>v</sub> Σ<sub>h</sub> P(v|h)P(h|D)</span>. No other classifier using the same <span class="m">H</span> and prior has lower expected error, and it can output a label no single hypothesis in <span class="m">H</span> predicts. It is also usually intractable, which is the whole motivation for approximations like Naive Bayes and for ensembles.</li>
+</ul>
+<h4>Two results that connect Bayes to the rest of the unit</h4>
+<div class="note key"><span class="lab">Least squares is maximum likelihood</span><p>If <span class="m">y = f(x) + ε</span> with <span class="m">ε ∼ N(0, σ²)</span> i.i.d., then maximizing <span class="m">P(D|h)</span> is exactly minimizing <span class="m">Σ(y<sub>i</sub> − h(x<sub>i</sub>))²</span>. Squared-error regression is not an arbitrary choice — it is the Gaussian-noise assumption written down. Similarly, an L2 weight penalty is a zero-mean Gaussian prior on the weights, so ridge/weight decay is MAP estimation.</p></div>
+<div class="note"><span class="lab">MDL — minimum description length</span><p>Taking <span class="m">−log₂</span> of the MAP objective turns it into <span class="m">argmin<sub>h</sub> [ length(h) + length(D | h) ]</span>: bits to describe the hypothesis plus bits to describe the data given it. Occam's razor falls out of Bayes rule, and this is the principled version of "prefer short trees."</p></div>
+<h4>Naive Bayes</h4>
+<div class="eq">v<sub>NB</sub> = argmax<sub>v ∈ V</sub> P(v) · Π<sub>i</sub> P(a<sub>i</sub> | v)<small>the "naive" step: attributes conditionally independent given the class</small></div>
+<p>The independence assumption is almost always false, yet the classifier is often excellent — because you only need the <em>argmax</em> to be right, not the probabilities. Its estimated probabilities are typically badly calibrated (pushed toward 0 and 1) even when its decisions are good; say that rather than reporting its confidences as if they were meaningful.</p>
+<ul>
+<li><b>Cost</b>: linear in data, one pass, <span class="m">O(nd)</span>; parameters grow as <span class="m">O(d·|V|)</span> rather than exponentially — that is the entire payoff of the assumption.</li>
+<li><b>Zero-frequency problem</b>: one unseen attribute–class pair sends the whole product to zero. Fix with <b>m-estimate / Laplace smoothing</b>: <span class="m">(n<sub>c</sub> + mp)/(n + m)</span>.</li>
+<li>Handles missing attributes gracefully (drop the factor), and is a strong text-classification baseline.</li>
+</ul>
+</article>
+
+<article class="topic" id="t-slcompare">
+<h3>The five-algorithm comparison table</h3>
+<p>Keep this in your head for the exam and paste its logic (not the table) into the SL report's conclusion.</p>
+<div class="tblwrap"><table>
+<tr><th>Algorithm</th><th>Train</th><th>Query</th><th>Scaling needed</th><th>Handles nonlinearity</th><th>Main overfit control</th><th>Interpretable</th></tr>
+<tr><td>Decision tree</td><td>Fast</td><td>Very fast</td><td>No</td><td>Yes (axis-parallel)</td><td>Pruning / depth</td><td>High</td></tr>
+<tr><td>k-NN</td><td>None</td><td>Slow</td><td><b>Yes</b></td><td>Yes</td><td>Larger k</td><td>Medium</td></tr>
+<tr><td>Neural net</td><td>Slow</td><td>Fast</td><td><b>Yes</b></td><td>Yes</td><td>Early stop, L2, size</td><td>Low</td></tr>
+<tr><td>SVM (RBF)</td><td>Slow (≈O(n²–n³))</td><td>O(#SV)</td><td><b>Yes</b></td><td>Yes</td><td>C, γ</td><td>Low</td></tr>
+<tr><td>Boosted stumps</td><td>Medium</td><td>Fast</td><td>No</td><td>Yes (additive)</td><td>Fewer rounds, shallower base</td><td>Medium</td></tr>
+</table></div>
+<div class="demo" id="d-bv"><header><h5>Bias–variance: fit a polynomial, watch the U</h5><button class="btn" id="bv-new">Resample training set</button></header><div class="body">
+<canvas id="bv-cv" height="300"></canvas>
+<div class="ctl">
+<label>polynomial degree <input type="range" id="bv-d" min="1" max="15" value="3"><output id="bv-do">3</output></label>
+<label>training points <input type="range" id="bv-n" min="8" max="60" value="20"><output id="bv-no">20</output></label>
+<label>noise σ <input type="range" id="bv-s" min="0" max="60" value="20"><output id="bv-so">0.20</output></label>
+</div>
+<div class="readout" id="bv-out"></div>
+</div></div>
+</article>
+</section>
+<section class="unit" id="u2" data-unit="Optimization">
+<div class="unithead"><div>
+  <div class="tag">Unit 2 · assignment 2 &amp; the RO report</div>
+  <h2>Randomized optimization</h2>
+  <p>Find <span class="m">argmax<sub>x ∈ X</sub> f(x)</span> when you have no derivative, no convexity, and only the ability to evaluate <span class="m">f</span>. Four algorithms, and a story about what each one <em>remembers</em>.</p>
+</div></div>
+
+<article class="topic" id="t-ro-setup">
+<h3>The framing: what each algorithm keeps</h3>
+<p class="lede">The cleanest way to order this unit is by memory. Every step up the ladder retains more information about the search so far, and pays for it in evaluations per iteration.</p>
+<div class="tblwrap"><table>
+<tr><th>Algorithm</th><th>What it retains</th><th>Per-iteration cost</th><th>Wins when</th></tr>
+<tr><td>Random hill climbing</td><td>One point</td><td>Cheapest</td><td>Unimodal, or basins are wide and easy to fall into</td></tr>
+<tr><td>Simulated annealing</td><td>One point + a temperature</td><td>Cheap</td><td>Rugged landscape, single good basin, plenty of iterations</td></tr>
+<tr><td>Genetic algorithm</td><td>A population</td><td>Moderate</td><td>Solution decomposes into recombinable building blocks</td></tr>
+<tr><td>MIMIC</td><td>A probability distribution over good points</td><td><b>Expensive</b> per iteration</td><td>Evaluating f is expensive; structure/dependencies matter</td></tr>
+</table></div>
+<p>The vocabulary you should use precisely: <b>fitness function</b> <span class="m">f</span>, <b>neighbourhood</b> <span class="m">N(x)</span> (which points count as "one step away" — you choose this, and it determines the landscape's ruggedness as much as <span class="m">f</span> does), <b>basin of attraction</b>, <b>local optimum</b> vs <b>global optimum</b>, and <b>function evaluations</b> as the currency. Compare algorithms by wall clock <em>and</em> by fitness evaluations; they rank differently, and noticing that is a report-grade observation.</p>
+<div class="note key"><span class="lab">No free lunch</span><p>Averaged over <em>all</em> possible fitness functions, every search algorithm has identical expected performance. So "algorithm A is better" is meaningless without "…on problems with structure S." Every claim in your RO report should name the structure: deceptiveness, plateaus, decomposability, basin width.</p></div>
+</article>
+
+<article class="topic" id="t-hc">
+<h3>Hill climbing &amp; random restarts</h3>
+<div class="block"><b>RHC</b>(f, N):
+  x ← random point
+  loop:
+      x′ ← argmax<sub>n ∈ N(x)</sub> f(n)      # or a random neighbour, for stochastic HC
+      if f(x′) ≤ f(x): return x      # local optimum
+      x ← x′
+
+<b>Random-restart HC</b>: run RHC k times from fresh random starts, keep the best.</div>
+<p>Pure hill climbing is greedy and gets stuck at the first local optimum, on plateaus (no improving neighbour but not a peak) and on ridges (progress requires moving diagonally, which the neighbourhood may not allow). Restarts convert the algorithm from "find the basin I landed in" to "sample basins": if a fraction <span class="m">p</span> of random starts land in the global basin, the expected number of restarts to find it is <span class="m">1/p</span>, and the chance of missing it after <span class="m">k</span> restarts is <span class="m">(1−p)<sup>k</sup></span>. That is why RHC with enough restarts is a genuinely strong baseline and why beating it is the bar in assignment 2.</p>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Reporting RHC results without stating the restart count and the total evaluation budget. RHC with 200 restarts and SA with 200× more iterations are not comparable to "SA with the default schedule" — fix the evaluation budget across algorithms and say you did.</p></div>
+</article>
+
+<article class="topic" id="t-sa">
+<h3>Simulated annealing</h3>
+<p class="lede">Hill climbing that is allowed to go downhill, with a probability that decays over time. The metaphor is metallurgical: heat the metal so atoms rearrange freely, then cool slowly enough that they settle into a low-energy crystal instead of freezing into a defect.</p>
+<div class="block"><b>SA</b>(f, N, T₀, cooling α):
+  x ← random point;  T ← T₀
+  repeat until T &lt; T<sub>min</sub>:
+      x′ ← random neighbour in N(x)
+      ΔE ← f(x′) − f(x)
+      if ΔE &gt; 0:  x ← x′                        # always accept improvement
+      else:        x ← x′ with prob. e<sup>ΔE/T</sup>       # sometimes accept a worse point
+      T ← α·T                                  # geometric cooling, α ∈ (0,1)</div>
+<div class="eq">P(accept a worse move) = exp(ΔE / T)<small>T → ∞: accept anything — a random walk. &nbsp; T → 0: accept nothing worse — pure hill climbing.</small></div>
+<h4>The two results to quote</h4>
+<ul>
+<li>With a sufficiently slow cooling schedule (logarithmic, <span class="m">T<sub>t</sub> ∝ 1/log t</span>), SA converges to the global optimum with probability 1. This is a theoretical guarantee, not a practical schedule — geometric cooling with <span class="m">α ≈ 0.95–0.999</span> is what you actually run, and you should note the gap.</li>
+<li>At a fixed temperature the stationary distribution is <b>Boltzmann</b>: <span class="m">π(x) ∝ e<sup>f(x)/T</sup></span>. High <span class="m">T</span> flattens it toward uniform; low <span class="m">T</span> concentrates it on the optima. This is the single most quotable fact about SA and it also explains softmax exploration in Unit 4.</li>
+</ul>
+<div class="note"><span class="lab">Tuning, in report language</span><p><span class="m">T₀</span> should be high enough that early acceptance of worse moves is common (a rule of thumb: set <span class="m">T₀</span> so ~80% of uphill-and-downhill moves are accepted initially, which you can estimate from the spread of <span class="m">ΔE</span> in a random walk). <span class="m">α</span> controls the exploration/exploitation trade: cool too fast and SA degenerates into hill climbing from one random start; cool too slowly and you burn the whole budget on a random walk.</p></div>
+<div class="demo" id="d-sa"><header><h5>Annealing on a rugged 1-D landscape</h5><div><button class="btn" id="sa-run">Run</button> <button class="btn" id="sa-reset">Reset</button></div></header><div class="body">
+<canvas id="sa-cv" height="280"></canvas>
+<div class="ctl">
+<label>T₀ <input type="range" id="sa-t" min="1" max="100" value="45"><output id="sa-to">4.5</output></label>
+<label>cooling α <input type="range" id="sa-a" min="800" max="999" value="985"><output id="sa-ao">0.985</output></label>
+<label>step size <input type="range" id="sa-s" min="1" max="60" value="25"><output id="sa-so">0.25</output></label>
+</div>
+<div class="readout" id="sa-out">Press Run. The red dot is the current point; the trail shows accepted moves; the gold dot is the best seen.</div>
+</div></div>
+</article>
+
+<article class="topic" id="t-ga">
+<h3>Genetic algorithms</h3>
+<p class="lede">Keep a population instead of a point, and generate new candidates by <em>recombining</em> good ones. Crossover is the only genuinely new idea in the unit — it is a jump through the space that no local search can make.</p>
+<div class="block"><b>GA</b>(f, pop size P, mating pool m, mutation rate μ):
+  population ← P random individuals
+  repeat:
+      evaluate fitness of all individuals
+      select m parents            # fitness-proportional (roulette), tournament, or truncation
+      offspring ← crossover(pairs of parents)
+      mutate offspring with rate μ
+      population ← replace (generational, or elitist: keep the best k)
+  until converged</div>
+<div class="tblwrap"><table>
+<tr><th>Operator</th><th>Variant</th><th>Effect</th></tr>
+<tr><td rowspan="3">Selection</td><td>Roulette (fitness-proportional)</td><td>Fast convergence; risks a super-individual taking over → premature convergence</td></tr>
+<tr><td>Tournament</td><td>Pick k at random, take the best; k tunes selection pressure smoothly</td></tr>
+<tr><td>Rank / truncation</td><td>Insensitive to fitness scale; keeps diversity longer</td></tr>
+<tr><td rowspan="2">Crossover</td><td>One-point / n-point</td><td>Preserves contiguous blocks — good when adjacent bits are related</td></tr>
+<tr><td>Uniform</td><td>Each bit from a random parent; no positional bias, more disruptive</td></tr>
+<tr><td>Mutation</td><td>Bit flip with prob. μ</td><td>Maintains diversity, escapes local optima; too high and the GA becomes random search</td></tr>
+</table></div>
+<h4>Building blocks and deception</h4>
+<p>The intuition is the <b>building-block hypothesis</b>: short, low-order, high-fitness schemata (partial patterns like <span class="m">1 1 * * * 0</span>) are combined by crossover into better full solutions. That works when the problem <em>is</em> decomposable. A <b>deceptive</b> problem is one where the low-order building blocks point away from the global optimum — and there GA does poorly while something that models dependencies (MIMIC) or that can traverse the whole path (SA with enough patience) does better.</p>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Attributing GA success to mutation. Mutation alone plus selection is essentially parallel hill climbing. The claim to test — and to report on — is whether <b>crossover</b> is doing the work: run the same GA with crossover disabled and compare. That single ablation is worth more than another hyper-parameter sweep.</p></div>
+</article>
+
+<article class="topic" id="t-mimic">
+<h3>MIMIC</h3>
+<p class="lede">Mutual-Information-Maximizing Input Clustering. Instead of carrying points, carry a <em>probability distribution</em> over good points, and refine it. It is the only algorithm in the unit that conveys structure between iterations.</p>
+<div class="block"><b>MIMIC</b>(f, sample size N, keep quantile q):
+  θ₀ ← uniform over X
+  repeat:
+      sample N points from P<sup>θ<sub>t</sub></sup>(x)                     # currently: P(x | f(x) ≥ θ_t)
+      θ<sub>t+1</sub> ← the q-th percentile fitness of that sample   # raise the bar
+      keep the points with f(x) ≥ θ<sub>t+1</sub>
+      re-estimate the distribution from those survivors
+  until θ stops rising</div>
+<p>The estimated distribution is a <b>dependency tree</b>: MIMIC approximates the true joint by a chain/tree of pairwise conditionals and picks the tree that minimizes KL divergence to the truth, which is equivalent to a maximum-spanning-tree over pairwise <b>mutual information</b> (the Chow–Liu construction). That is why the algorithm's name mentions mutual information, and it is the link back to Unit 0.</p>
+<div class="grid2">
+<div class="mini"><h5>Why it wins</h5><ul><li>Orders of magnitude fewer <em>fitness evaluations</em> — decisive when <span class="m">f</span> is a simulation or a physical experiment.</li><li>It represents dependencies between variables, so it handles structured and deceptive problems the GA's blind crossover cannot.</li><li>The learned tree is itself interpretable output — you can read which variables interact.</li></ul></div>
+<div class="mini"><h5>Why it often loses in practice</h5><ul><li>Each iteration costs far more compute (sampling + estimating a tree over d² mutual informations).</li><li>Needs a large enough sample per iteration or the structure estimate is noise.</li><li>Wall-clock comparisons flatter the cheap algorithms; evaluation-count comparisons flatter MIMIC. <b>Report both.</b></li></ul></div>
+</div>
+</article>
+
+<article class="topic" id="t-ro-probs">
+<h3>The benchmark problems, and what each is designed to expose</h3>
+<p>Assignment 2 asks you to pick problems that <em>highlight</em> different algorithms. Choose deliberately — the choice is half the grade.</p>
+<div class="tblwrap"><table>
+<tr><th>Problem</th><th>Structure</th><th>Highlights</th></tr>
+<tr><td>Four Peaks</td><td>Two large basins with a narrow reward for combining a head of 1s and a tail of 0s; local optima are <b>deceptive</b></td><td><b>GA / MIMIC</b> — you must combine two independently discovered blocks, which crossover does and hill climbing cannot</td></tr>
+<tr><td>Continuous Peaks</td><td>Many local optima, no block structure</td><td><b>SA</b> — sustained downhill tolerance walks between peaks</td></tr>
+<tr><td>Flip Flop</td><td>Reward alternating bits; smooth, many small improvements</td><td><b>SA / RHC</b> — dense improving neighbours, no structure to exploit</td></tr>
+<tr><td>K-Coloring / N-Queens</td><td>Constraint satisfaction, strong variable dependencies</td><td><b>MIMIC</b> — dependency structure is exactly what it models</td></tr>
+<tr><td>Knapsack</td><td>Weak dependencies + a global budget constraint</td><td><b>MIMIC / GA</b>, depending on correlation between weights and values</td></tr>
+<tr><td>Travelling salesman</td><td>Permutation space; needs custom crossover/neighbourhood</td><td>Good for showing that <b>neighbourhood design</b> matters more than algorithm choice</td></tr>
+</table></div>
+<div class="note key"><span class="lab">Assignment 2 tactic — the neural-net part</span><p>The second half replaces backprop with RHC, SA and GA on the same network's weight vector. Expect backprop to win on wall clock and usually on final error, because it uses gradient information the others throw away. The interesting analysis is <em>why</em>: gradient descent gets <span class="m">O(d)</span> directional information per evaluation while RO gets one scalar, so RO's advantage only appears when the surface is so rugged or so non-differentiable that the gradient misleads. Fix the network architecture across all four optimizers and plot loss vs iteration <em>and</em> vs wall clock.</p></div>
+</article>
+</section>
+
+
+<section class="unit" id="u3" data-unit="Unsupervised">
+<div class="unithead"><div>
+  <div class="tag">Unit 3 · assignment 3 &amp; the UL report</div>
+  <h2>Unsupervised learning &amp; dimensionality reduction</h2>
+  <p>No labels. Two jobs: group the data (clustering) and shrink the description (feature selection and transformation) — then show what each does to a supervised learner downstream.</p>
+</div></div>
+
+<article class="topic" id="t-kmeans">
+<h3>k-means (Lloyd's algorithm)</h3>
+<div class="block"><b>k-means</b>(X, k):
+  initialize k centers                 # random points, or k-means++
+  repeat:
+      <b>assign</b>: each x → nearest center (Voronoi partition)
+      <b>update</b>: each center → mean of its assigned points
+  until assignments stop changing</div>
+<p>It is coordinate descent on one objective — within-cluster sum of squares:</p>
+<div class="eq">J = Σ<sub>j=1..k</sub> Σ<sub>x ∈ C<sub>j</sub></sub> ‖x − μ<sub>j</sub>‖²<small>The assign step minimizes J over assignments with centers fixed; the update step minimizes J over centers with assignments fixed</small></div>
+<h4>Why it converges — the proof you should be able to sketch</h4>
+<p>Each step weakly decreases <span class="m">J</span> (the mean is the unique minimizer of squared distance to a set of points, and reassigning to the nearest center cannot increase it), <span class="m">J ≥ 0</span> is bounded below, and there are finitely many possible partitions (<span class="m">k<sup>n</sup></span>), so it cannot cycle and must terminate — in finite time, at a local optimum. It emphatically does <b>not</b> find the global optimum; the global k-means problem is NP-hard.</p>
+<h4>The properties and failure modes</h4>
+<ul>
+<li><b>Assumes</b> spherical, similar-sized, similar-density clusters, because the only geometry is Euclidean distance to a mean. It fails on elongated, nested or crescent-shaped clusters.</li>
+<li><b>Sensitive to initialization</b> — run it many times with different seeds and keep the lowest <span class="m">J</span>; or use <b>k-means++</b>, which seeds centers with probability proportional to squared distance from the nearest existing center and comes with an <span class="m">O(log k)</span> approximation guarantee in expectation.</li>
+<li><b>Sensitive to scale and to outliers</b> (a mean is not robust; k-medoids is).</li>
+<li><b>Complexity</b> <span class="m">O(n·k·d·i)</span> per run.</li>
+<li><b>Choosing k</b>: elbow on <span class="m">J</span>, <b>silhouette score</b> (mean of <span class="m">(b−a)/max(a,b)</span> — cohesion vs separation, range −1..1), gap statistic, or — in this course's assignment — downstream supervised performance and label agreement measures like adjusted Rand index or normalized mutual information.</li>
+</ul>
+<div class="demo" id="d-km"><header><h5>Lloyd's algorithm, one step at a time</h5><div><button class="btn" id="km-step">Step</button> <button class="btn p" id="km-run">Run</button> <button class="btn" id="km-seed">Re-seed centers</button> <button class="btn" id="km-data">New data</button></div></header><div class="body">
+<canvas id="km-cv" height="330"></canvas>
+<div class="ctl"><label>k <input type="range" id="km-k" min="2" max="7" value="3"><output id="km-ko">3</output></label>
+<label><input type="checkbox" id="km-pp" checked> k-means++ seeding</label></div>
+<div class="readout" id="km-out"></div>
+</div></div>
+</article>
+
+<article class="topic" id="t-em">
+<h3>Soft clustering: EM and Gaussian mixtures</h3>
+<p class="lede">k-means makes hard assignments. EM assigns <em>responsibilities</em> — each point belongs to every cluster with a probability — which lets clusters overlap and have shapes.</p>
+<div class="block"><b>EM for a GMM</b>:
+  <b>E-step</b>: γ<sub>ij</sub> = P(cluster j | x<sub>i</sub>) = π<sub>j</sub>·N(x<sub>i</sub> | μ<sub>j</sub>, Σ<sub>j</sub>) / Σ<sub>l</sub> π<sub>l</sub>·N(x<sub>i</sub> | μ<sub>l</sub>, Σ<sub>l</sub>)
+  <b>M-step</b>: μ<sub>j</sub> = Σ<sub>i</sub> γ<sub>ij</sub> x<sub>i</sub> / Σ<sub>i</sub> γ<sub>ij</sub>
+           Σ<sub>j</sub> = Σ<sub>i</sub> γ<sub>ij</sub>(x<sub>i</sub>−μ<sub>j</sub>)(x<sub>i</sub>−μ<sub>j</sub>)ᵀ / Σ<sub>i</sub> γ<sub>ij</sub>
+           π<sub>j</sub> = (1/n) Σ<sub>i</sub> γ<sub>ij</sub>
+  repeat — log-likelihood is monotonically non-decreasing</div>
+<div class="tblwrap"><table>
+<tr><th></th><th>k-means</th><th>EM / GMM</th></tr>
+<tr><td>Assignment</td><td>Hard (0/1)</td><td>Soft (probabilities)</td></tr>
+<tr><td>Cluster shape</td><td>Spherical, equal size</td><td>Ellipsoidal via full covariance</td></tr>
+<tr><td>Objective</td><td>Minimize WCSS</td><td>Maximize log-likelihood</td></tr>
+<tr><td>Guarantee</td><td>Terminates in finite steps</td><td>Monotone increase; <b>converges in the limit</b>, may not terminate exactly</td></tr>
+<tr><td>Relationship</td><td colspan="2">k-means is the limiting case of GMM-EM with spherical, equal, vanishing covariances</td></tr>
+</table></div>
+<p>Both are local-optimum algorithms with the same cure: multiple restarts. EM additionally can diverge in likelihood if a Gaussian collapses onto a single point (covariance → 0, likelihood → ∞) — regularize the covariance to prevent it.</p>
+<div class="note"><span class="lab">Generalize the idea</span><p>EM is not about Gaussians. It is the general recipe for maximum likelihood with hidden variables: guess the hidden values in expectation (E), maximize the parameters as if that guess were data (M), repeat. It reappears in HMMs (Baum–Welch) and in POMDP belief updates.</p></div>
+</article>
+
+<article class="topic" id="t-clprops">
+<h3>Hierarchical clustering &amp; the impossibility theorem</h3>
+<p><b>Single-linkage agglomerative clustering</b>: start with <span class="m">n</span> singleton clusters, repeatedly merge the two clusters whose closest pair of points is nearest, until <span class="m">k</span> remain. Complexity <span class="m">O(n³)</span> naively, <span class="m">O(n² log n)</span> with a heap. The linkage choice changes everything:</p>
+<div class="tblwrap"><table>
+<tr><th>Linkage</th><th>Inter-cluster distance</th><th>Behaviour</th></tr>
+<tr><td>Single</td><td>min pairwise</td><td>Finds elongated/chained shapes; suffers from <b>chaining</b> through noise bridges</td></tr>
+<tr><td>Complete</td><td>max pairwise</td><td>Compact, roughly equal-diameter clusters; sensitive to outliers</td></tr>
+<tr><td>Average</td><td>mean pairwise</td><td>Compromise</td></tr>
+<tr><td>Ward</td><td>increase in WCSS</td><td>k-means-like, spherical clusters</td></tr>
+</table></div>
+<h4>Kleinberg's impossibility theorem</h4>
+<p>No clustering function on distances can satisfy all three of these simultaneously:</p>
+<ul>
+<li><b>Richness</b> — every possible partition of the points is achievable for some distance function.</li>
+<li><b>Scale invariance</b> — multiplying all distances by <span class="m">c &gt; 0</span> leaves the clustering unchanged.</li>
+<li><b>Consistency</b> — shrinking within-cluster distances and stretching between-cluster distances leaves the clustering unchanged.</li>
+</ul>
+<p>Each pair is achievable; all three are not. The practical reading, and the one to write down: <em>clustering has no objectively correct answer</em>. Every algorithm silently gives one of the three up (fixing <span class="m">k</span> sacrifices richness; a fixed distance threshold sacrifices scale invariance), so a clustering result must be justified by what you do with it, not by the algorithm's authority.</p>
+</article>
+
+<article class="topic" id="t-fs">
+<h3>Feature selection: filtering vs wrapping</h3>
+<p>Why bother: fewer features means less curse of dimensionality, faster training, less overfitting, and interpretability. But exhaustive subset selection is <span class="m">2<sup>d</sup></span> and provably NP-hard.</p>
+<div class="tblwrap"><table>
+<tr><th></th><th>Filtering</th><th>Wrapping</th></tr>
+<tr><td>Criterion</td><td>Score features by an intrinsic measure (information gain, variance, correlation, chi-squared)</td><td>Score subsets by the actual learner's CV performance</td></tr>
+<tr><td>Learner involved?</td><td>No — done once, up front</td><td>Yes — inside the loop</td></tr>
+<tr><td>Speed</td><td>Fast</td><td>Slow</td></tr>
+<tr><td>Accounts for feature interaction?</td><td>Usually no (scores features independently)</td><td>Yes</td></tr>
+<tr><td>Accounts for the learner's bias?</td><td>No</td><td>Yes — that is the whole point</td></tr>
+<tr><td>Search used</td><td>Ranking / threshold</td><td>Forward, backward, or randomized search (hello, Unit 2)</td></tr>
+</table></div>
+<p>Two definitions that get tested: a feature is <b>strongly relevant</b> if removing it alone degrades the Bayes optimal classifier; <b>weakly relevant</b> if it is not strongly relevant but there is some subset of the other features whose accuracy it improves; otherwise <b>irrelevant</b>. Relevance is a property of the data distribution; <b>usefulness</b> is a property of a particular learner — a strongly relevant feature can be useless to a learner whose bias cannot exploit it, and that distinction is a favourite exam question.</p>
+</article>
+
+<article class="topic" id="t-dr">
+<h3>Feature transformation: PCA, ICA, RCA, LDA</h3>
+<p class="lede">Selection picks a subset of the original axes; transformation builds new axes as combinations of the old ones. Four methods, four different objectives — know which is which and you can answer almost any question in this section.</p>
+<div class="tblwrap"><table>
+<tr><th>Method</th><th>Maximizes / seeks</th><th>Components are</th><th>Best for</th></tr>
+<tr><td>PCA</td><td>Variance retained (equivalently, minimum L2 reconstruction error)</td><td>Orthogonal, ordered by eigenvalue</td><td>Compression, de-noising, visualization</td></tr>
+<tr><td>ICA</td><td>Statistical <b>independence</b> (max mutual information with the source; min mutual info between components)</td><td>Independent, non-orthogonal, unordered</td><td>Blind source separation — the cocktail party problem</td></tr>
+<tr><td>RCA / RP</td><td>Nothing — random projection</td><td>Random directions</td><td>Cheap, surprisingly effective; works because of Johnson–Lindenstrauss</td></tr>
+<tr><td>LDA</td><td>Between-class / within-class scatter ratio</td><td>≤ (#classes − 1) discriminants</td><td>Supervised — it uses labels, so it is not really in this unit</td></tr>
+</table></div>
+<h4>PCA, mechanically</h4>
+<div class="block">1. center X (and usually standardize — otherwise the largest-unit feature wins)
+2. C = XᵀX / (n−1)                        # covariance
+3. eigendecompose C = VΛVᵀ                # or take the SVD of X directly
+4. keep the top m eigenvectors by eigenvalue
+5. Z = X·V<sub>m</sub>                              # projected data
+   explained variance ratio of component i = λ<sub>i</sub> / Σλ</div>
+<p>Facts worth memorizing: eigenvalues are the variance along each component, they are non-negative, they sum to the total variance; the first PC is the direction of maximum variance and also the best-fitting line in a least-squares-perpendicular sense; components are mutually orthogonal; a zero eigenvalue means a linearly dependent direction. PCA is the optimal <em>linear</em> transformation for L2 reconstruction — which is exactly why it can destroy a discriminative signal that happens to live along a low-variance direction.</p>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Assuming high variance means high usefulness. PCA is unsupervised — it has never seen your labels. If the class-separating direction has small variance, PCA will discard it and downstream accuracy drops. Report that when it happens; it is a finding, not a failure.</p></div>
+<div class="note"><span class="lab">ICA in one paragraph</span><p>ICA assumes observations are linear mixtures of statistically independent, <b>non-Gaussian</b> sources and recovers the unmixing matrix by maximizing non-Gaussianity (kurtosis or negentropy). It cannot recover Gaussian sources — a mixture of Gaussians is Gaussian and the rotation is unidentifiable — and it recovers sources only up to permutation and scale. On images, PCA components look like blurry global averages; ICA components look like edges. On a tabular dataset, ICA components with high kurtosis are the interesting ones.</p></div>
+<div class="note key"><span class="lab">Assignment 3 tactic</span><p>The report is a 2×2×2 grid: {k-means, EM} × {PCA, ICA, RCA, one selection method} × {two datasets}, then re-run the neural net on the reduced data, then again with cluster labels as an added feature. The narrative that scores well is not "accuracy went from 0.81 to 0.79" but "RP variance across seeds is large (report the spread across 10 random projections), yet mean accuracy nearly matches PCA at the same dimension — so most of the signal is not concentrated in a few directions here." Always plot: explained variance / eigenvalue scree for PCA, kurtosis per component for ICA, reconstruction error vs dimension for RP, and clustering-vs-true-label agreement.</p></div>
+</article>
+</section>
+<section class="unit" id="u4" data-unit="Reinforcement">
+<div class="unithead"><div>
+  <div class="tag">Unit 4 · assignment 4 &amp; the RL report</div>
+  <h2>Reinforcement learning</h2>
+  <p>Decisions over time, with delayed and scalar feedback. The MDP is the model; Bellman is the equation; everything else is how you solve it with or without knowing the model.</p>
+</div></div>
+
+<article class="topic" id="t-mdp">
+<h3>Markov decision processes</h3>
+<p class="lede">An MDP is the tuple <span class="m">⟨S, A, T, R, γ⟩</span>: states, actions, transition model <span class="m">T(s,a,s′) = P(s′ | s,a)</span>, reward <span class="m">R(s)</span> (or <span class="m">R(s,a)</span> / <span class="m">R(s,a,s′)</span>), and discount <span class="m">γ ∈ [0,1)</span>.</p>
+<p>The <b>Markov property</b>: the next state depends only on the current state and action, not on history. "Only the present matters" — and if it does not hold, you fix it by enlarging the state, not by ignoring it. Also assume stationarity: <span class="m">T</span> and <span class="m">R</span> do not change over time.</p>
+<div class="eq">Return: &nbsp; G<sub>t</sub> = R<sub>t</sub> + γR<sub>t+1</sub> + γ²R<sub>t+2</sub> + … = Σ<sub>k≥0</sub> γ<sup>k</sup>R<sub>t+k</sub><small>With |R| ≤ R<sub>max</sub>, the infinite sum is bounded by R<sub>max</sub>/(1−γ) — that is why γ &lt; 1 makes infinite horizons well-defined</small></div>
+<p>What <span class="m">γ</span> <em>means</em>: <span class="m">γ → 0</span> is myopic (only immediate reward); <span class="m">γ → 1</span> is far-sighted and mathematically slower to converge. A useful reading is that <span class="m">1/(1−γ)</span> is the effective horizon — <span class="m">γ = 0.9</span> ≈ 10 steps, <span class="m">γ = 0.99</span> ≈ 100 steps. In a gridworld with a small negative step cost, lowering <span class="m">γ</span> or making the step cost more negative pushes the optimal policy toward short, risky routes; a positive step reward can make the optimal policy avoid terminating at all.</p>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Confusing a <b>policy</b> <span class="m">π : S → A</span> (what to do everywhere, not just along one path) with a <b>plan</b> (a fixed action sequence). Under stochastic transitions a plan is useless after the first surprise — that is precisely why RL learns policies.</p></div>
+</article>
+
+<article class="topic" id="t-bellman">
+<h3>Bellman equations, value iteration, policy iteration</h3>
+<div class="eq">V<sup>π</sup>(s) = R(s) + γ Σ<sub>s′</sub> T(s,π(s),s′) V<sup>π</sup>(s′)<br>V*(s) = R(s) + γ max<sub>a</sub> Σ<sub>s′</sub> T(s,a,s′) V*(s′)<br>Q*(s,a) = R(s,a) + γ Σ<sub>s′</sub> T(s,a,s′) max<sub>a′</sub> Q*(s′,a′)<br>π*(s) = argmax<sub>a</sub> Σ<sub>s′</sub> T(s,a,s′) V*(s′)<small>V is a value over states; Q is a value over state–action pairs — and only Q lets you act without knowing T</small></div>
+<div class="grid2">
+<div class="mini"><h5>Value iteration</h5><div class="block" style="margin:8px 0 0; font-size:13px">V₀ ← arbitrary
+repeat:
+  V<sub>k+1</sub>(s) ← R(s) + γ max<sub>a</sub> Σ T(s,a,s′)V<sub>k</sub>(s′)
+until max<sub>s</sub>|V<sub>k+1</sub>−V<sub>k</sub>| &lt; ε
+π(s) = greedy w.r.t. V</div><p style="margin-top:8px">Cost per sweep <span class="m">O(|S|²|A|)</span>. Converges geometrically; the policy is usually optimal long before the values are.</p></div>
+<div class="mini"><h5>Policy iteration</h5><div class="block" style="margin:8px 0 0; font-size:13px">π₀ ← arbitrary
+repeat:
+  <b>evaluate</b>: solve V<sup>π</sup> (linear system,
+     |S| equations, or iterate to converge)
+  <b>improve</b>: π′(s) ← argmax<sub>a</sub> Σ T·V<sup>π</sup>
+until π′ = π</div><p style="margin-top:8px">Evaluation costs <span class="m">O(|S|³)</span> if solved exactly, but there are finitely many policies and each iteration strictly improves, so it converges in <b>few</b> iterations — often faster in practice.</p></div>
+</div>
+<h4>Why it converges: the contraction argument</h4>
+<p>The Bellman operator <span class="m">B</span> is a <b>γ-contraction</b> in the max norm: <span class="m">‖BV − BU‖<sub>∞</sub> ≤ γ‖V − U‖<sub>∞</sub></span>. By the Banach fixed-point theorem it has a unique fixed point (<span class="m">V*</span>) and repeated application converges to it from any start, with error shrinking by a factor <span class="m">γ</span> per sweep. Being able to state this — contraction, unique fixed point, geometric convergence, independent of initialization — is the highest-value fact in Unit 4.</p>
+<div class="demo" id="d-vi"><header><h5>Value iteration on a stochastic gridworld</h5><div><button class="btn" id="vi-step">Sweep</button> <button class="btn p" id="vi-run">Run to convergence</button> <button class="btn" id="vi-reset">Reset</button></div></header><div class="body">
+<canvas id="vi-cv" height="330" style="max-width:600px;margin:0 auto"></canvas>
+<div class="ctl">
+<label>γ <input type="range" id="vi-g" min="50" max="99" value="90"><output id="vi-go">0.90</output></label>
+<label>step reward <input type="range" id="vi-r" min="-40" max="0" value="-4"><output id="vi-ro">-0.04</output></label>
+<label>action noise <input type="range" id="vi-n" min="0" max="40" value="20"><output id="vi-no">0.20</output></label>
+</div>
+<div class="readout" id="vi-out"></div>
+</div></div>
+</article>
+
+<article class="topic" id="t-q">
+<h3>Q-learning &amp; temporal difference</h3>
+<p class="lede">Drop the model. Q-learning learns <span class="m">Q*</span> from experience tuples <span class="m">(s, a, r, s′)</span> alone — no <span class="m">T</span>, no <span class="m">R</span>, and it still converges to the optimal Q.</p>
+<div class="eq">Q(s,a) ← Q(s,a) + α [ r + γ max<sub>a′</sub> Q(s′,a′) − Q(s,a) ]<small>the bracket is the TD error δ: what happened minus what you expected</small></div>
+<div class="tblwrap"><table>
+<tr><th></th><th>Q-learning</th><th>SARSA</th></tr>
+<tr><td>Target</td><td class="num">r + γ max<sub>a′</sub> Q(s′,a′)</td><td class="num">r + γ Q(s′,a′) with a′ actually taken</td></tr>
+<tr><td>Type</td><td><b>Off-policy</b> — learns π* while behaving with any exploring policy</td><td><b>On-policy</b> — learns the value of the policy it is following, exploration included</td></tr>
+<tr><td>Behaviour near danger</td><td>Learns the optimal (possibly risky) path</td><td>Learns a safer path, because exploration mistakes are priced in</td></tr>
+</table></div>
+<h4>The convergence conditions — quote all three</h4>
+<ol>
+<li>Every state–action pair is visited infinitely often (so exploration must never fully stop).</li>
+<li>The learning rate satisfies the Robbins–Monro conditions: <span class="m">Σα<sub>t</sub> = ∞</span> and <span class="m">Σα<sub>t</sub>² &lt; ∞</span> — e.g. <span class="m">α<sub>t</sub> = 1/t</span>. A constant <span class="m">α</span> violates the second and gives you a bounded oscillation instead of convergence, which is often what you want in a non-stationary problem.</li>
+<li>Finite MDP with bounded rewards.</li>
+</ol>
+<h4>The TD family</h4>
+<p><b>TD(0)</b> updates from one step: <span class="m">V(s) ← V(s) + α[r + γV(s′) − V(s)]</span> — low variance, biased by the current estimate (bootstrapping). <b>Monte Carlo</b> waits for the full return: unbiased, high variance, needs episodes to terminate. <b>TD(λ)</b> interpolates with eligibility traces: <span class="m">λ = 0</span> is TD(0), <span class="m">λ = 1</span> is (every-visit) Monte Carlo, and intermediate <span class="m">λ ≈ 0.7–0.9</span> is usually best because it spreads credit backward over the whole recent trajectory instead of one step at a time.</p>
+<div class="note key"><span class="lab">Bootstrapping, in one sentence</span><p>"TD methods update a guess toward a guess." That is the source of both their efficiency (learn from incomplete episodes, online) and their bias.</p></div>
+</article>
+
+<article class="topic" id="t-explore">
+<h3>Exploration vs exploitation</h3>
+<p>You cannot learn about actions you never take, and you cannot collect reward while experimenting. Everything in this section is a way of pricing that trade.</p>
+<div class="tblwrap"><table>
+<tr><th>Strategy</th><th>Rule</th><th>Notes</th></tr>
+<tr><td>ε-greedy</td><td>Best action with prob. 1−ε, else uniform random</td><td>Simple; <b>decay ε</b> so behaviour converges. Explores uniformly even among clearly bad actions.</td></tr>
+<tr><td>Softmax / Boltzmann</td><td class="num">P(a) ∝ e<sup>Q(s,a)/τ</sup></td><td>Explores in proportion to value; τ is a temperature — the same Boltzmann form as simulated annealing</td></tr>
+<tr><td>Optimistic initialization</td><td>Set Q₀ above any achievable value</td><td>Free systematic exploration: unvisited actions look best until tried. Works only in stationary problems.</td></tr>
+<tr><td>UCB</td><td class="num">Q(a) + c·√(ln t / N(a))</td><td>Optimism under uncertainty; logarithmic regret in bandits</td></tr>
+</table></div>
+<p>The bandit case (one state) is where the theory is clean: regret is the cumulative gap to the best arm, and the best algorithms achieve <span class="m">O(log t)</span> regret. RL adds the complication that exploring changes which states you even reach.</p>
+<div class="note"><span class="lab">Reward shaping</span><p>Adding intermediate rewards speeds learning but can change the optimal policy — the classic failure is an agent that farms the shaping reward in a loop instead of finishing. <b>Potential-based shaping</b> is the safe form: <span class="m">F(s,s′) = γΦ(s′) − Φ(s)</span> for any potential function <span class="m">Φ</span>. It provably leaves the optimal policy unchanged, and naming it is worth a mark whenever shaping comes up.</p></div>
+</article>
+
+<article class="topic" id="t-rladv">
+<h3>Model-based vs model-free, and where the field goes next</h3>
+<div class="tblwrap"><table>
+<tr><th></th><th>Model-based (VI / PI, Dyna, R-max)</th><th>Model-free (Q-learning, SARSA, TD)</th></tr>
+<tr><td>Needs T and R?</td><td>Yes — known or learned from counts</td><td>No</td></tr>
+<tr><td>Sample efficiency</td><td>High — can plan with simulated experience</td><td>Lower — every update needs real experience</td></tr>
+<tr><td>Compute per step</td><td>Higher (planning sweeps)</td><td>Lower</td></tr>
+<tr><td>Risk</td><td>Model error compounds during planning</td><td>Slow, high-variance learning</td></tr>
+</table></div>
+<p>Three ideas that round out the unit:</p>
+<ul>
+<li><b>Function approximation.</b> Tabular Q needs a cell per state–action pair, so it dies on large or continuous state spaces. Replace the table with <span class="m">Q(s,a;θ)</span> — linear features or a neural net. The cost is that convergence guarantees weaken: the "deadly triad" of bootstrapping + off-policy + function approximation can diverge.</li>
+<li><b>POMDPs.</b> When the state is not observable, act on a <b>belief state</b> — a probability distribution over states, updated by Bayes rule from observations. The belief MDP is a continuous-state MDP, and solving it exactly is intractable in general.</li>
+<li><b>Game theory / multi-agent.</b> When another learner shares the environment it is no longer stationary. Know: a <b>Nash equilibrium</b> is a joint strategy where no player gains by unilateral deviation; every finite game has one in mixed strategies; two-player zero-sum games are solved by <b>minimax</b> (and the minimax value equals the Nash value); the prisoner's dilemma shows the Nash equilibrium can be Pareto-dominated; and repeated play with the <b>folly of a fixed horizon</b> unravels cooperation by backward induction while an indefinite horizon (via <span class="m">γ</span>) can sustain it — the <b>folk theorem</b>.</li>
+</ul>
+<div class="note key"><span class="lab">Assignment 4 tactic</span><p>Pick two MDPs that differ deliberately — a small gridworld (say 5×5) and a large or highly stochastic one (say 20×20, or a non-grid problem) — so you can show how VI/PI/Q-learning scale differently. Report, for each: iterations to convergence, wall clock, the resulting policy (plot the arrow grid), and reward per episode. The analysis worth writing is about the crossovers: PI converges in fewer iterations but each is more expensive; Q-learning needs orders of magnitude more samples but no model; raising <span class="m">γ</span> slows every method and can change the optimal policy qualitatively — show that with two policy plots side by side.</p></div>
+</article>
+</section>
+
+
+<section class="unit" id="u5" data-unit="Drill">
+<div class="unithead"><div>
+  <div class="tag">Unit 5 · active recall</div>
+  <h2>Drill</h2>
+  <p>Flashcards for the definitions, a self-test for the reasoning, and a one-screen cheatsheet for the night before.</p>
+</div></div>
+
+<article class="topic" id="t-cards">
+<h3>Flashcards</h3>
+<p>Click the card to flip. Arrow keys work too. Order is shuffled per deck so you are not memorizing positions.</p>
+<div class="deckbar" id="deckbar"></div>
+<div class="card" id="card" tabindex="0" role="button" aria-live="polite">
+  <span class="side" id="cardside">Prompt</span>
+  <div class="txt" id="cardtxt">Loading…</div>
+  <span class="hint">click or press space to flip · ← → to move</span>
+</div>
+<div class="cardnav">
+  <button class="btn" id="cprev">← Previous</button>
+  <button class="btn" id="cnext">Next →</button>
+  <button class="btn" id="cshuf">Shuffle</button>
+  <span class="pos" id="cpos">1 / 1</span>
+</div>
+</article>
+
+<article class="topic" id="t-quiz">
+<h3>Self-test: the questions that actually get asked</h3>
+<div class="grid2" style="grid-template-columns:1fr">
+<details class="qa"><summary>You add 10,000 more training examples and CV error does not move. What do you conclude, and what do you do?</summary><div class="ans"><p>High bias, not high variance — variance error shrinks with data and bias does not. The fix is a richer hypothesis space or better features: deeper tree, more hidden units, a nonlinear kernel, feature engineering. Adding data or regularizing further is wasted effort.</p></div></details>
+<details class="qa"><summary>Boosting has driven training error to zero at round 40, yet test error is still falling at round 300. Explain.</summary><div class="ans"><p>Further rounds keep increasing the <em>margin</em> — the confidence with which points are classified — even though the sign of every prediction is already right. Generalization bounds for voted classifiers depend on the margin distribution rather than on the number of rounds, so test error can keep improving. Caveat to state in the same answer: with label noise this reverses, because AdaBoost's exponential reweighting pours unbounded weight onto mislabelled points.</p></div></details>
+<details class="qa"><summary>Why is SA with a very high fixed temperature useless, and with a very low one also useless?</summary><div class="ans"><p>The acceptance probability is <span class="m">e<sup>ΔE/T</sup></span>. As <span class="m">T → ∞</span> that tends to 1 for every move, so the search is an unbiased random walk that never exploits. As <span class="m">T → 0</span> it tends to 0 for every worsening move, so SA reduces to hill climbing and gets trapped in the first local optimum. The value is entirely in the schedule between the two — and the stationary distribution <span class="m">π(x) ∝ e<sup>f(x)/T</sup></span> shows exactly how the concentration on optima tightens as <span class="m">T</span> falls.</p></div></details>
+<details class="qa"><summary>A GA and a random-restart hill climber both solve Four Peaks, but the GA needs far fewer evaluations. Why?</summary><div class="ans"><p>Four Peaks rewards combining a prefix of 1s with a suffix of 0s. Each half is a separate building block that local search can discover, but a hill climber holding one half cannot acquire the other without descending through a large fitness valley. Crossover splices two parents that each solved one half, reaching the global optimum in a single operation. The general claim: GA beats local search when the problem decomposes into recombinable, independently-discoverable blocks.</p></div></details>
+<details class="qa"><summary>PCA reduced your data to 10 components capturing 95% of variance, and your classifier got worse. Is PCA broken?</summary><div class="ans"><p>No — it did what it optimizes. PCA is unsupervised and maximizes retained variance, which is not the same as retained discriminability. If the class-separating direction has small variance (a subtle but consistent offset), it lands in the discarded 5%. Remedies: LDA (supervised), keep more components, or use a selection method scored on the actual learner. Reporting this as a finding — with the scree plot and the accuracy drop side by side — is a stronger result than a small accuracy gain.</p></div></details>
+<details class="qa"><summary>Why does Q-learning converge to π* even when the agent behaves randomly the whole time?</summary><div class="ans"><p>Because the update target uses <span class="m">max<sub>a′</sub> Q(s′,a′)</span>, not the action the behaviour policy will actually take — it is off-policy. The behaviour policy only has to guarantee that every state–action pair is visited infinitely often; the learned values are those of the greedy policy regardless. With the Robbins–Monro learning-rate conditions and a finite MDP, Q converges to <span class="m">Q*</span> with probability 1. Contrast SARSA, whose target uses the action actually taken, so it converges to the value of the exploring policy.</p></div></details>
+<details class="qa"><summary>State the VC dimension of linear separators in ℝ² and prove it.</summary><div class="ans"><p>It is 3. <em>Lower bound</em>: three points in general position (a triangle) can be labelled in all 8 ways by some line — exhibit the cases. <em>Upper bound</em>: no set of 4 points can be shattered. Either one point lies inside the triangle of the other three (label it opposite to the rest and no line works), or the four form a convex quadrilateral (label the two diagonal pairs oppositely — XOR — and no line separates them). Since <span class="m">VC = d + 1</span> for <span class="m">ℝ<sup>d</sup></span>, this generalizes.</p></div></details>
+<details class="qa"><summary>Your k-means silhouette score peaks at k = 2, but the data has 7 true classes. What went wrong?</summary><div class="ans"><p>Probably nothing algorithmic. Silhouette measures geometric cohesion and separation under a Euclidean metric — it finds the structure the metric can see, which need not match semantic labels. Likely culprits: unscaled features letting one dominate distance; non-spherical or unequal-density classes violating k-means' assumptions; several true classes overlapping in feature space. Diagnose by scoring cluster–label agreement (adjusted Rand, NMI) as well as silhouette, and by re-clustering after PCA/ICA. Kleinberg's theorem is the honest framing: there is no k that is correct independent of what you want the clustering for.</p></div></details>
+<details class="qa"><summary>When would you prefer policy iteration over value iteration, and vice versa?</summary><div class="ans"><p>Policy iteration when <span class="m">|S|</span> is small enough that exact policy evaluation (an <span class="m">O(|S|³)</span> linear solve, or a cheap iterative one) is affordable — it converges in very few iterations because the policy space is finite and each step strictly improves. Value iteration when the state space is large: each sweep is only <span class="m">O(|S|²|A|)</span>, and you can stop early since the greedy policy typically becomes optimal well before the values converge. Modified policy iteration (a few evaluation sweeps rather than an exact solve) is the usual compromise, and mentioning it shows you understand they are two ends of one dial.</p></div></details>
+<details class="qa"><summary>Give the one-line inductive bias for each of: decision trees, k-NN, neural nets, SVMs, Naive Bayes.</summary><div class="ans"><p>Trees: prefer short trees with informative attributes near the root, axis-parallel splits. k-NN: nearby points share labels, all features weigh equally in the metric. Neural nets: nearly unrestricted representation, but gradient descent from small weights prefers smooth, low-complexity functions. SVM: among separators, prefer the maximum-margin one; the kernel fixes the space it lives in. Naive Bayes: the MAP hypothesis under the assumption that attributes are conditionally independent given the class.</p></div></details>
+</div>
+</article>
+
+<article class="topic" id="t-cheat">
+<h3>Cheatsheet — the night before</h3>
+<h4>Formulas</h4>
+<div class="tblwrap"><table>
+<tr><th>Name</th><th>Formula</th><th>Read it as</th></tr>
+<tr><td>Entropy</td><td class="num">H(X) = −Σ p log₂ p</td><td>Expected bits per draw</td></tr>
+<tr><td>Information gain</td><td class="num">H(S) − Σ (|S<sub>v</sub>|/|S|) H(S<sub>v</sub>)</td><td>Mutual information of attribute and label</td></tr>
+<tr><td>Gini</td><td class="num">1 − Σ p²</td><td>Chance two random draws differ in class</td></tr>
+<tr><td>Bias–variance</td><td class="num">E[err] = bias² + var + σ²</td><td>Wrong-model + unstable-model + noise</td></tr>
+<tr><td>PAC (finite H)</td><td class="num">m ≥ (1/ε)(ln|H| + ln(1/δ))</td><td>Samples for ε-accuracy at 1−δ confidence</td></tr>
+<tr><td>VC bound</td><td class="num">m ≥ (1/ε)(8·VC·log₂(13/ε) + 4log₂(2/δ))</td><td>Same, for infinite H</td></tr>
+<tr><td>Bayes rule</td><td class="num">P(h|D) = P(D|h)P(h)/P(D)</td><td>Posterior ∝ likelihood × prior</td></tr>
+<tr><td>Naive Bayes</td><td class="num">argmax<sub>v</sub> P(v)Π P(a<sub>i</sub>|v)</td><td>MAP with conditional independence</td></tr>
+<tr><td>SVM dual</td><td class="num">max Σα − ½ΣΣ αα yy K(x,x)</td><td>Data enters only as inner products</td></tr>
+<tr><td>AdaBoost weight</td><td class="num">α<sub>t</sub> = ½ln((1−ε<sub>t</sub>)/ε<sub>t</sub>)</td><td>Vote ∝ how much better than chance</td></tr>
+<tr><td>SA acceptance</td><td class="num">P = e<sup>ΔE/T</sup></td><td>Boltzmann: π(x) ∝ e<sup>f(x)/T</sup></td></tr>
+<tr><td>k-means objective</td><td class="num">J = ΣΣ ‖x − μ‖²</td><td>Within-cluster sum of squares</td></tr>
+<tr><td>Silhouette</td><td class="num">(b − a)/max(a,b)</td><td>Separation vs cohesion, −1 to 1</td></tr>
+<tr><td>Bellman optimality</td><td class="num">V*(s) = R(s) + γ max<sub>a</sub> Σ T V*(s′)</td><td>Now plus discounted best future</td></tr>
+<tr><td>Q-learning</td><td class="num">Q ← Q + α[r + γ max Q′ − Q]</td><td>Nudge toward the TD target</td></tr>
+<tr><td>Discounted return bound</td><td class="num">≤ R<sub>max</sub>/(1−γ)</td><td>Effective horizon 1/(1−γ)</td></tr>
+</table></div>
+<h4>Which algorithm, when</h4>
+<div class="tblwrap"><table>
+<tr><th>Situation</th><th>Reach for</th><th>Because</th></tr>
+<tr><td>Mixed types, need to explain the model</td><td>Decision tree</td><td>No scaling, readable rules</td></tr>
+<tr><td>Small n, complex boundary, d moderate</td><td>SVM (RBF)</td><td>Margin bound doesn't grow with feature-space dimension</td></tr>
+<tr><td>Large n, plenty of compute</td><td>Neural net / boosting</td><td>Low bias, scales with data</td></tr>
+<tr><td>Very high d, sparse (text)</td><td>Naive Bayes / linear SVM</td><td>Independence assumption is cheap and holds well enough</td></tr>
+<tr><td>Noisy labels</td><td>Bagging, pruned trees</td><td>Boosting chases mislabelled points</td></tr>
+<tr><td>Streaming / online data</td><td>k-NN, online perceptron</td><td>Incorporating a new point is free</td></tr>
+<tr><td>Fitness is expensive to evaluate</td><td>MIMIC</td><td>Fewest evaluations per unit of progress</td></tr>
+<tr><td>Solution decomposes into blocks</td><td>GA</td><td>Crossover recombines them</td></tr>
+<tr><td>Rugged, no structure, cheap f</td><td>SA or RHC + restarts</td><td>Simple, many iterations per second</td></tr>
+<tr><td>Model known, states few</td><td>Policy iteration</td><td>Converges in few, expensive iterations</td></tr>
+<tr><td>Model known, states many</td><td>Value iteration</td><td>Cheap sweeps, early stop on policy</td></tr>
+<tr><td>No model</td><td>Q-learning</td><td>Off-policy, learns π* from any exploration</td></tr>
+</table></div>
+<h4>Twelve traps that cost marks</h4>
+<ol>
+<li>Reporting accuracy on imbalanced data.</li>
+<li>Tuning on the test set — or plotting test error vs hyper-parameter and calling it validation.</li>
+<li>Not standardizing features before k-NN, SVM-RBF, neural nets, k-means or PCA.</li>
+<li>Calling k-NN "unbiased".</li>
+<li>Claiming backprop or k-means or EM finds a global optimum.</li>
+<li>Saying boosting never overfits, without the noise caveat.</li>
+<li>Treating KL divergence as a distance.</li>
+<li>Confusing "shatters some set of d points" with "shatters every set of d points".</li>
+<li>Comparing RO algorithms without fixing the evaluation budget, or reporting only wall clock.</li>
+<li>Assuming PCA's high-variance components are the useful ones.</li>
+<li>Applying ICA to Gaussian sources and expecting recovery.</li>
+<li>Comparing Q-learning to value iteration on episode count while ignoring that one has the model and the other does not.</li>
+</ol>
+<h4>Reading map</h4>
+<div class="tblwrap"><table>
+<tr><th>Topic</th><th>Mitchell, <i>Machine Learning</i></th><th>Also</th></tr>
+<tr><td>Concept learning, inductive bias</td><td>Ch. 2</td><td></td></tr>
+<tr><td>Decision trees</td><td>Ch. 3</td><td></td></tr>
+<tr><td>Neural nets / backprop</td><td>Ch. 4</td><td></td></tr>
+<tr><td>Evaluating hypotheses</td><td>Ch. 5</td><td></td></tr>
+<tr><td>Bayesian learning, MDL, Naive Bayes, EM</td><td>Ch. 6</td><td></td></tr>
+<tr><td>PAC, VC, mistake bounds</td><td>Ch. 7</td><td></td></tr>
+<tr><td>Instance-based, k-NN, locally weighted</td><td>Ch. 8</td><td></td></tr>
+<tr><td>Genetic algorithms</td><td>Ch. 9</td><td>Also: De Bonet et al., <i>MIMIC</i> (NIPS 1996)</td></tr>
+<tr><td>Reinforcement learning</td><td>Ch. 13</td><td>Sutton &amp; Barto, <i>Reinforcement Learning</i>, Ch. 3–6</td></tr>
+<tr><td>SVM / kernels</td><td>—</td><td>Burges tutorial; Bishop Ch. 7</td></tr>
+<tr><td>Boosting</td><td>—</td><td>Schapire, <i>The Boosting Approach to Machine Learning</i></td></tr>
+<tr><td>Clustering impossibility</td><td>—</td><td>Kleinberg, <i>An Impossibility Theorem for Clustering</i> (NIPS 2002)</td></tr>
+</table></div>
+</article>
+</section>
+</div>
+</main>
+</div>
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)},
+    $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function pal(){return{bg:css('--bg'),sf:css('--surface'),ink:css('--ink'),mut:css('--muted'),ln:css('--line'),ln2:css('--line-2'),gold:css('--gold'),goldb:css('--gold-bright'),navy:css('--navy'),ok:css('--ok'),bad:css('--bad'),warn:css('--warn')};}
+
+/* ---------- theme ---------- */
+var TK='ml7641-theme';
+function applyTheme(t){ if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);} else {document.documentElement.removeAttribute('data-theme');} redrawAll(); }
+try{var st=localStorage.getItem(TK); if(st)applyTheme(st);}catch(e){}
+$('#themeb').addEventListener('click',function(){
+  var cur=document.documentElement.getAttribute('data-theme')||'system';
+  var next=cur==='system'?'dark':cur==='dark'?'light':'system';
+  applyTheme(next); this.textContent= next==='system'?'Theme':(next==='dark'?'Dark':'Light');
+  try{localStorage.setItem(TK,next);}catch(e){}
+});
+
+/* ---------- TOC + progress ---------- */
+var units=$$('.unit'), topics=$$('.topic'), toc=$('#toc'), PK='ml7641-progress';
+var done={}; try{done=JSON.parse(localStorage.getItem(PK)||'{}')||{};}catch(e){done={};}
+function saveProg(){try{localStorage.setItem(PK,JSON.stringify(done));}catch(e){}}
+var links={};
+units.forEach(function(u){
+  var lab=document.createElement('div'); lab.className='unitlab';
+  lab.innerHTML='<span>'+u.getAttribute('data-unit')+'</span>';
+  toc.appendChild(lab);
+  $$('.topic',u).forEach(function(t){
+    var h=$('h3',t), a=document.createElement('a');
+    a.href='#'+t.id; a.innerHTML='<span class="dot"></span><span>'+h.textContent.trim()+'</span>';
+    toc.appendChild(a); links[t.id]=a;
+    var c=document.createElement('input'); c.type='checkbox'; c.className='chk';
+    c.title='Mark reviewed'; c.checked=!!done[t.id];
+    c.addEventListener('change',function(){ done[t.id]=c.checked; if(!c.checked)delete done[t.id]; saveProg(); paint(); });
+    h.appendChild(c);
+  });
+});
+function paint(){
+  var n=0; topics.forEach(function(t){ var d=!!done[t.id]; if(d)n++; links[t.id].classList.toggle('done',d); });
+  $('#pbar').style.width=(100*n/topics.length)+'%';
+  $('#ptxt').textContent=n+'/'+topics.length;
+}
+paint();
+$('#resetb').addEventListener('click',function(){ done={}; saveProg(); $$('.chk').forEach(function(c){c.checked=false;}); paint(); });
+
+var obs=new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ for(var k in links)links[k].classList.remove('on'); var l=links[e.target.id]; if(l)l.classList.add('on'); } });
+},{rootMargin:'-15% 0px -70% 0px'});
+topics.forEach(function(t){obs.observe(t);});
+
+/* ---------- search ---------- */
+var idx=topics.map(function(t){return {el:t,txt:t.textContent.toLowerCase()};});
+$('#q').addEventListener('input',function(){
+  var v=this.value.trim().toLowerCase();
+  document.body.classList.toggle('searching',!!v);
+  if(!v){ idx.forEach(function(i){i.el.classList.remove('hide');}); units.forEach(function(u){u.classList.remove('hide');}); $('#nores').classList.remove('on'); return; }
+  var hits=0;
+  idx.forEach(function(i){ var m=i.txt.indexOf(v)>=0; i.el.classList.toggle('hide',!m); if(m)hits++; });
+  units.forEach(function(u){ u.classList.toggle('hide', $$('.topic:not(.hide)',u).length===0); });
+  $('#nores').classList.toggle('on',hits===0);
+});
+
+/* ---------- canvas helper ---------- */
+var drawers=[];
+function mk(id,h){
+  var cv=$(id); if(!cv)return null;
+  var ctx=cv.getContext('2d');
+  function size(){ var dpr=window.devicePixelRatio||1, w=cv.clientWidth||600;
+    cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); return {w:w,h:h}; }
+  return {cv:cv,ctx:ctx,size:size};
+}
+function redrawAll(){ drawers.forEach(function(f){try{f();}catch(e){}}); }
+window.addEventListener('resize',function(){redrawAll();});
+
+/* ================= 1. entropy ================= */
+(function(){
+  var d=mk('#ent-cv',240); if(!d)return;
+  function H(p){ if(p<=0||p>=1)return 0; return -(p*Math.log2(p)+(1-p)*Math.log2(1-p)); }
+  function draw(){
+    var s=d.size(), c=d.ctx, P=pal(), W=s.w, Hh=s.h, m={l:44,r:16,t:14,b:30};
+    c.clearRect(0,0,W,Hh);
+    var p=+$('#ent-p').value/100, f=+$('#ent-f').value/100, pl=+$('#ent-l').value/100;
+    // right child implied so total positives balance
+    var pr=(p-f*pl)/(1-f); var valid = pr>=0 && pr<=1;
+    if(!valid) pr=Math.min(1,Math.max(0,pr));
+    var X=function(v){return m.l+v*(W-m.l-m.r);}, Y=function(v){return Hh-m.b-v*(Hh-m.t-m.b);};
+    c.strokeStyle=P.ln; c.lineWidth=1;
+    [0,0.5,1].forEach(function(g){ c.beginPath(); c.moveTo(m.l,Y(g)); c.lineTo(W-m.r,Y(g)); c.stroke();
+      c.fillStyle=P.mut; c.font='11px ui-monospace,monospace'; c.textAlign='right'; c.fillText(g.toFixed(1),m.l-8,Y(g)+4); });
+    c.beginPath(); for(var i=0;i<=200;i++){ var q=i/200; var x=X(q), y=Y(H(q)); i?c.lineTo(x,y):c.moveTo(x,y); }
+    c.strokeStyle=P.goldb; c.lineWidth=2.2; c.stroke();
+    function dot(q,col,lab){ c.beginPath(); c.arc(X(q),Y(H(q)),5,0,6.3); c.fillStyle=col; c.fill();
+      c.fillStyle=col; c.font='11px ui-monospace,monospace'; c.textAlign='center'; c.fillText(lab,X(q),Y(H(q))-11); }
+    dot(p,P.ink,'parent'); dot(pl,P.navy,'left'); dot(pr,P.bad,'right');
+    c.fillStyle=P.mut; c.textAlign='center'; c.font='11px ui-monospace,monospace';
+    c.fillText('P(+)',W/2,Hh-8); c.save(); c.translate(13,Hh/2); c.rotate(-Math.PI/2); c.fillText('H (bits)',0,0); c.restore();
+    var gain=H(p)-(f*H(pl)+(1-f)*H(pr));
+    $('#ent-po').textContent=p.toFixed(2); $('#ent-lo').textContent=pl.toFixed(2); $('#ent-fo').textContent=Math.round(f*100)+'%';
+    $('#ent-read').textContent='gain = '+gain.toFixed(3)+' bits';
+    $('#ent-out').textContent='H(parent) = '+H(p).toFixed(3)+'   H(left) = '+H(pl).toFixed(3)+'   H(right) = '+H(pr).toFixed(3)
+      +'   →  Gain = '+H(p).toFixed(3)+' − ('+f.toFixed(2)+'·'+H(pl).toFixed(3)+' + '+(1-f).toFixed(2)+'·'+H(pr).toFixed(3)+') = '+gain.toFixed(3)
+      + (valid?'':'   [P(+) right clipped — this split is inconsistent with the parent]');
+  }
+  ['#ent-p','#ent-f','#ent-l'].forEach(function(id){$(id).addEventListener('input',draw);});
+  drawers.push(draw); draw();
+})();
+
+/* ================= 2. kNN ================= */
+(function(){
+  var d=mk('#knn-cv',320); if(!d)return;
+  var pts=[];
+  function gen(){
+    var noise=+$('#knn-n').value/100; pts=[];
+    for(var i=0;i<120;i++){
+      var x=Math.random(), y=Math.random();
+      var truth = (Math.sin(x*6.0)*0.22+0.5) > y ? 1:0;
+      if(Math.random()<noise) truth=1-truth;
+      pts.push({x:x,y:y,c:truth});
+    }
+  }
+  function classify(x,y,k,w){
+    var ds=pts.map(function(p){var dx=p.x-x,dy=p.y-y;return {d:Math.sqrt(dx*dx+dy*dy),c:p.c};});
+    ds.sort(function(a,b){return a.d-b.d;});
+    var s=0; for(var i=0;i<k&&i<ds.length;i++){ var wt=w?1/(ds[i].d*ds[i].d+1e-6):1; s+= (ds[i].c?wt:-wt); }
+    return s>0?1:0;
+  }
+  function draw(){
+    var s=d.size(), c=d.ctx, P=pal(), W=s.w, Hh=s.h;
+    var k=+$('#knn-k').value, w=$('#knn-w').checked;
+    c.clearRect(0,0,W,Hh); c.fillStyle=P.bg; c.fillRect(0,0,W,Hh);
+    var step=6, errs=0;
+    for(var px=0;px<W;px+=step) for(var py=0;py<Hh;py+=step){
+      var cl=classify(px/W,py/Hh,k,w);
+      c.fillStyle = cl? 'rgba(0,48,87,0.13)':'rgba(179,163,105,0.20)';
+      c.fillRect(px,py,step,step);
+    }
+    pts.forEach(function(p){
+      var cl=classify(p.x,p.y,Math.max(k,1),w); if(cl!==p.c)errs++;
+      c.beginPath(); c.arc(p.x*W,p.y*Hh,4.4,0,6.3);
+      c.fillStyle=p.c?P.navy:P.goldb; c.fill(); c.lineWidth=1; c.strokeStyle=P.bg; c.stroke();
+    });
+    $('#knn-ko').textContent=k; $('#knn-no').textContent=$('#knn-n').value+'%';
+    $('#knn-out').textContent='k = '+k+'   training error = '+(100*errs/pts.length).toFixed(1)+'%   '+
+      (k===1?'— k=1 always fits the training data; the boundary is jagged. That is variance.':
+       k>=21?'— heavily smoothed; the boundary ignores local structure. That is bias.':
+       '— boundary smooths as k grows: variance down, bias up.');
+  }
+  $('#knn-k').addEventListener('input',draw);
+  $('#knn-w').addEventListener('change',draw);
+  $('#knn-n').addEventListener('input',function(){gen();draw();});
+  $('#knn-new').addEventListener('click',function(){gen();draw();});
+  gen(); drawers.push(draw); draw();
+})();
+
+/* ================= 3. bias-variance polynomial ================= */
+(function(){
+  var d=mk('#bv-cv',300); if(!d)return;
+  var tr=[];
+  function f(x){ return Math.sin(2.2*x)*0.8 + 0.25*x; }
+  function gen(){
+    var n=+$('#bv-n').value, sd=+$('#bv-s').value/100; tr=[];
+    for(var i=0;i<n;i++){ var x=-2+4*Math.random();
+      var u=Math.random()||1e-9, v=Math.random();
+      var g=Math.sqrt(-2*Math.log(u))*Math.cos(6.283*v);
+      tr.push({x:x,y:f(x)+sd*g}); }
+  }
+  function fit(deg){
+    var n=deg+1, A=[], b=[];
+    for(var i=0;i<n;i++){ A.push(new Array(n).fill(0)); b.push(0); }
+    tr.forEach(function(p){ var z=p.x/2, pw=[1]; for(var j=1;j<n;j++)pw.push(pw[j-1]*z);
+      for(var r=0;r<n;r++){ b[r]+=pw[r]*p.y; for(var cc=0;cc<n;cc++)A[r][cc]+=pw[r]*pw[cc]; } });
+    for(var r2=0;r2<n;r2++)A[r2][r2]+=1e-8;
+    // gaussian elimination
+    for(var col=0;col<n;col++){
+      var piv=col; for(var r3=col+1;r3<n;r3++) if(Math.abs(A[r3][col])>Math.abs(A[piv][col]))piv=r3;
+      var t=A[col];A[col]=A[piv];A[piv]=t; var tb=b[col];b[col]=b[piv];b[piv]=tb;
+      if(Math.abs(A[col][col])<1e-14) continue;
+      for(var r4=0;r4<n;r4++){ if(r4===col)continue; var m=A[r4][col]/A[col][col];
+        for(var c4=col;c4<n;c4++)A[r4][c4]-=m*A[col][c4]; b[r4]-=m*b[col]; }
+    }
+    var w=[]; for(var i2=0;i2<n;i2++) w.push(Math.abs(A[i2][i2])<1e-14?0:b[i2]/A[i2][i2]);
+    return w;
+  }
+  function ev(w,x){ var z=x/2,s=0,p=1; for(var i=0;i<w.length;i++){s+=w[i]*p;p*=z;} return s; }
+  function draw(){
+    var s=d.size(), c=d.ctx, P=pal(), W=s.w, Hh=s.h, m={l:34,r:14,t:12,b:26};
+    var deg=+$('#bv-d').value;
+    c.clearRect(0,0,W,Hh);
+    var X=function(x){return m.l+((x+2)/4)*(W-m.l-m.r);}, Y=function(y){return Hh-m.b-((y+2.2)/4.4)*(Hh-m.t-m.b);};
+    c.strokeStyle=P.ln; c.lineWidth=1;
+    for(var g=-2;g<=2;g++){ c.beginPath(); c.moveTo(m.l,Y(g)); c.lineTo(W-m.r,Y(g)); c.stroke(); }
+    c.beginPath(); for(var i=0;i<=200;i++){var x=-2+4*i/200; i?c.lineTo(X(x),Y(f(x))):c.moveTo(X(x),Y(f(x)));}
+    c.strokeStyle=P.mut; c.lineWidth=1.6; c.setLineDash([5,4]); c.stroke(); c.setLineDash([]);
+    var w=fit(deg);
+    c.beginPath(); for(var j=0;j<=300;j++){var x2=-2+4*j/300,y2=ev(w,x2); var yy=Math.max(-3,Math.min(3,y2)); j?c.lineTo(X(x2),Y(yy)):c.moveTo(X(x2),Y(yy));}
+    c.strokeStyle=P.navy; c.lineWidth=2.4; c.stroke();
+    var tre=0; tr.forEach(function(p){ var e=p.y-ev(w,p.x); tre+=e*e;
+      c.beginPath(); c.arc(X(p.x),Y(Math.max(-2.2,Math.min(2.2,p.y))),3.6,0,6.3); c.fillStyle=P.goldb; c.fill(); });
+    var te=0,N=200; for(var t2=0;t2<N;t2++){ var xt=-2+4*t2/(N-1); var e2=f(xt)-ev(w,xt); te+=e2*e2; }
+    $('#bv-do').textContent=deg; $('#bv-no').textContent=$('#bv-n').value; $('#bv-so').textContent=(+$('#bv-s').value/100).toFixed(2);
+    $('#bv-out').textContent='train MSE = '+(tre/tr.length).toFixed(4)+'    true-function MSE = '+(te/N).toFixed(4)+
+      '    '+(deg<=1?'— underfit: train and test error both high (bias).':deg>=10?'— overfit: train error tiny, test error exploding (variance).':'— near the sweet spot.');
+  }
+  ['#bv-d'].forEach(function(id){$(id).addEventListener('input',draw);});
+  ['#bv-n','#bv-s'].forEach(function(id){$(id).addEventListener('input',function(){gen();draw();});});
+  $('#bv-new').addEventListener('click',function(){gen();draw();});
+  gen(); drawers.push(draw); draw();
+})();
+
+/* ================= 4. simulated annealing ================= */
+(function(){
+  var d=mk('#sa-cv',280); if(!d)return;
+  function f(x){ return Math.sin(x)*1.0 + Math.sin(2.7*x)*0.55 + Math.sin(0.6*x)*1.25 - 0.02*x*x; }
+  var cur=0,best=0,T=4.5,trail=[],anim=null,it=0,acc=0;
+  var LO=-9,HI=9;
+  function reset(){ cur=LO+Math.random()*(HI-LO); best=cur; T=+$('#sa-t').value/10; trail=[]; it=0; acc=0; draw(); }
+  function stepN(n){
+    var alpha=+$('#sa-a').value/1000, sz=+$('#sa-s').value/100;
+    for(var i=0;i<n;i++){
+      var cand=cur+(Math.random()*2-1)*sz*3;
+      if(cand<LO)cand=LO; if(cand>HI)cand=HI;
+      var dE=f(cand)-f(cur);
+      if(dE>0||Math.random()<Math.exp(dE/Math.max(T,1e-6))){ cur=cand; acc++; trail.push(cur); if(trail.length>400)trail.shift(); }
+      if(f(cur)>f(best))best=cur;
+      T*=alpha; it++;
+    }
+  }
+  function draw(){
+    var s=d.size(), c=d.ctx, P=pal(), W=s.w, Hh=s.h, m={l:14,r:14,t:14,b:24};
+    c.clearRect(0,0,W,Hh);
+    var X=function(x){return m.l+((x-LO)/(HI-LO))*(W-m.l-m.r);}, Y=function(y){return Hh-m.b-((y+3.2)/6.6)*(Hh-m.t-m.b);};
+    c.beginPath(); c.moveTo(X(LO),Hh-m.b);
+    for(var i=0;i<=300;i++){var x=LO+(HI-LO)*i/300; c.lineTo(X(x),Y(f(x)));}
+    c.lineTo(X(HI),Hh-m.b); c.closePath(); c.fillStyle='rgba(179,163,105,0.14)'; c.fill();
+    c.beginPath(); for(var j=0;j<=300;j++){var x2=LO+(HI-LO)*j/300; j?c.lineTo(X(x2),Y(f(x2))):c.moveTo(X(x2),Y(f(x2)));}
+    c.strokeStyle=P.ln2; c.lineWidth=2; c.stroke();
+    c.strokeStyle=P.navy; c.lineWidth=1; c.globalAlpha=.45; c.beginPath();
+    trail.forEach(function(t,k){ k?c.lineTo(X(t),Y(f(t))):c.moveTo(X(t),Y(f(t))); }); c.stroke(); c.globalAlpha=1;
+    c.beginPath(); c.arc(X(best),Y(f(best)),6,0,6.3); c.fillStyle=P.goldb; c.fill();
+    c.beginPath(); c.arc(X(cur),Y(f(cur)),5,0,6.3); c.fillStyle=P.bad; c.fill();
+    $('#sa-to').textContent=(+$('#sa-t').value/10).toFixed(1);
+    $('#sa-ao').textContent=(+$('#sa-a').value/1000).toFixed(3);
+    $('#sa-so').textContent=(+$('#sa-s').value/100).toFixed(2);
+    $('#sa-out').textContent='iter '+it+'   T = '+T.toFixed(4)+'   accept rate = '+(it?(100*acc/it).toFixed(0):0)+'%   f(cur) = '+f(cur).toFixed(3)+'   f(best) = '+f(best).toFixed(3)+
+      (T<0.02?'   — frozen: it now behaves as pure hill climbing.':'');
+  }
+  $('#sa-run').addEventListener('click',function(){
+    if(anim){cancelAnimationFrame(anim);anim=null;this.textContent='Run';return;}
+    this.textContent='Pause';
+    var self=this;
+    (function loop(){ stepN(6); draw(); if(T>0.005){anim=requestAnimationFrame(loop);} else {anim=null; self.textContent='Run';} })();
+  });
+  $('#sa-reset').addEventListener('click',function(){ if(anim){cancelAnimationFrame(anim);anim=null;$('#sa-run').textContent='Run';} reset(); });
+  ['#sa-t','#sa-a','#sa-s'].forEach(function(id){$(id).addEventListener('input',draw);});
+  reset(); drawers.push(draw);
+})();
+
+/* ================= 5. k-means ================= */
+(function(){
+  var d=mk('#km-cv',330); if(!d)return;
+  var pts=[],cen=[],iter=0,anim=null,changed=true;
+  var COL=['#003057','#B3A369','#2C6A4E','#963232','#7B5EA7','#1F7A8C','#C4691B'];
+  function gendata(){
+    pts=[]; var K=3+Math.floor(Math.random()*2);
+    for(var g=0;g<K;g++){ var cx=0.18+0.64*Math.random(), cy=0.18+0.64*Math.random(), sd=0.05+0.06*Math.random();
+      for(var i=0;i<45;i++){
+        var u=Math.random()||1e-9,v=Math.random();
+        var g1=Math.sqrt(-2*Math.log(u))*Math.cos(6.283*v), g2=Math.sqrt(-2*Math.log(u))*Math.sin(6.283*v);
+        pts.push({x:Math.min(.98,Math.max(.02,cx+sd*g1)),y:Math.min(.98,Math.max(.02,cy+sd*g2)),c:0});
+      } }
+  }
+  function seed(){
+    var k=+$('#km-k').value; cen=[]; iter=0; changed=true;
+    if($('#km-pp').checked){
+      cen.push({x:pts[Math.floor(Math.random()*pts.length)].x,y:pts[Math.floor(Math.random()*pts.length)].y});
+      while(cen.length<k){
+        var ds=pts.map(function(p){ var m=1e9; cen.forEach(function(c){var dx=p.x-c.x,dy=p.y-c.y;m=Math.min(m,dx*dx+dy*dy);}); return m; });
+        var tot=ds.reduce(function(a,b){return a+b;},0), r=Math.random()*tot, s=0, pick=0;
+        for(var i=0;i<ds.length;i++){ s+=ds[i]; if(s>=r){pick=i;break;} }
+        cen.push({x:pts[pick].x,y:pts[pick].y});
+      }
+    } else { for(var j=0;j<k;j++)cen.push({x:Math.random(),y:Math.random()}); }
+    assign(); draw();
+  }
+  function assign(){
+    changed=false;
+    pts.forEach(function(p){ var b=0,bd=1e9;
+      cen.forEach(function(c,i){var dx=p.x-c.x,dy=p.y-c.y,dd=dx*dx+dy*dy; if(dd<bd){bd=dd;b=i;}});
+      if(p.c!==b){p.c=b;changed=true;} });
+  }
+  function update(){
+    cen.forEach(function(c,i){ var sx=0,sy=0,n=0;
+      pts.forEach(function(p){ if(p.c===i){sx+=p.x;sy+=p.y;n++;} });
+      if(n){c.x=sx/n;c.y=sy/n;} });
+  }
+  function wcss(){ var s=0; pts.forEach(function(p){var c=cen[p.c];var dx=p.x-c.x,dy=p.y-c.y;s+=dx*dx+dy*dy;}); return s; }
+  function step(){ update(); assign(); iter++; draw(); }
+  function draw(){
+    var s=d.size(), c=d.ctx, P=pal(), W=s.w, Hh=s.h;
+    c.clearRect(0,0,W,Hh); c.fillStyle=P.bg; c.fillRect(0,0,W,Hh);
+    pts.forEach(function(p){ c.beginPath(); c.arc(p.x*W,p.y*Hh,3.8,0,6.3); c.fillStyle=COL[p.c%COL.length]; c.globalAlpha=.72; c.fill(); c.globalAlpha=1; });
+    cen.forEach(function(cc,i){
+      c.beginPath(); c.arc(cc.x*W,cc.y*Hh,9,0,6.3); c.fillStyle=COL[i%COL.length]; c.fill();
+      c.lineWidth=2.5; c.strokeStyle=P.bg; c.stroke();
+      c.beginPath(); c.moveTo(cc.x*W-13,cc.y*Hh); c.lineTo(cc.x*W+13,cc.y*Hh);
+      c.moveTo(cc.x*W,cc.y*Hh-13); c.lineTo(cc.x*W,cc.y*Hh+13); c.strokeStyle=COL[i%COL.length]; c.lineWidth=1.5; c.stroke();
+    });
+    $('#km-ko').textContent=$('#km-k').value;
+    $('#km-out').textContent='iteration '+iter+'   J (within-cluster SSE) = '+wcss().toFixed(4)+
+      (changed?'   — assignments still changing':'   — converged: no assignment changed, so J cannot decrease further. This is a local optimum.');
+  }
+  $('#km-step').addEventListener('click',step);
+  $('#km-run').addEventListener('click',function(){
+    if(anim){clearInterval(anim);anim=null;this.textContent='Run';return;}
+    this.textContent='Stop'; var self=this;
+    anim=setInterval(function(){ step(); if(!changed){clearInterval(anim);anim=null;self.textContent='Run';} },420);
+  });
+  $('#km-seed').addEventListener('click',seed);
+  $('#km-data').addEventListener('click',function(){gendata();seed();});
+  $('#km-k').addEventListener('input',seed);
+  gendata(); seed(); drawers.push(draw);
+})();
+
+/* ================= 6. value iteration ================= */
+(function(){
+  var d=mk('#vi-cv',330); if(!d)return;
+  d.size=function(){ var dpr=window.devicePixelRatio||1, w=d.cv.clientWidth||600;
+    var h=Math.max(200,Math.min(400, w*6/8));
+    d.cv.width=w*dpr; d.cv.height=h*dpr; d.cv.style.height=h+'px';
+    d.ctx.setTransform(dpr,0,0,dpr,0,0); return {w:w,h:h}; };
+  var R=6,C=8, walls=[[1,2],[2,2],[3,2],[1,5],[2,5],[4,5]], goal=[0,7], pit=[1,7];
+  var V=[],sweeps=0,anim=null,delta=0;
+  function isW(r,c){ return walls.some(function(w){return w[0]===r&&w[1]===c;}); }
+  function term(r,c){ return (r===goal[0]&&c===goal[1])||(r===pit[0]&&c===pit[1]); }
+  function reset(){ V=[]; for(var r=0;r<R;r++){V.push([]); for(var c=0;c<C;c++)V[r].push(0);} sweeps=0; delta=0; draw(); }
+  var A=[[-1,0],[1,0],[0,-1],[0,1]];
+  function nxt(r,c,a){ var nr=r+A[a][0], nc=c+A[a][1];
+    if(nr<0||nr>=R||nc<0||nc>=C||isW(nr,nc))return [r,c]; return [nr,nc]; }
+  function qval(r,c,a,g,noise){
+    var s=0;
+    var perp = (a<2)?[2,3]:[0,1];
+    var probs=[[a,1-noise],[perp[0],noise/2],[perp[1],noise/2]];
+    probs.forEach(function(p){ var n=nxt(r,c,p[0]); s+=p[1]*V[n[0]][n[1]]; });
+    return g*s;
+  }
+  function sweep(){
+    var g=+$('#vi-g').value/100, sr=+$('#vi-r').value/100, noise=+$('#vi-n').value/100;
+    var nV=[]; delta=0;
+    for(var r=0;r<R;r++){ nV.push([]); for(var c=0;c<C;c++){
+      if(isW(r,c)){nV[r].push(0);continue;}
+      if(r===goal[0]&&c===goal[1]){nV[r].push(1);continue;}
+      if(r===pit[0]&&c===pit[1]){nV[r].push(-1);continue;}
+      var best=-1e9;
+      for(var a=0;a<4;a++) best=Math.max(best, sr+qval(r,c,a,g,noise));
+      nV[r].push(best); delta=Math.max(delta,Math.abs(best-V[r][c]));
+    } }
+    V=nV; sweeps++;
+  }
+  function bestA(r,c,g,noise){ var b=0,bv=-1e9;
+    for(var a=0;a<4;a++){ var q=qval(r,c,a,g,noise);
+      var n=nxt(r,c,a); if(n[0]===r&&n[1]===c) q-=1e-6;   // display tie-break: don't point at a wall
+      if(q>bv){bv=q;b=a;} }
+    return b; }
+  function draw(){
+    var s=d.size(), c=d.ctx, P=pal(), W=s.w, Hh=s.h;
+    var cw=Math.min(W/C,(Hh-4)/R), ox=(W-cw*C)/2, oy=2;
+    c.clearRect(0,0,W,Hh);
+    var g=+$('#vi-g').value/100, noise=+$('#vi-n').value/100;
+    for(var r=0;r<R;r++)for(var cc=0;cc<C;cc++){
+      var x=ox+cc*cw, y=oy+r*cw;
+      if(isW(r,cc)){ c.fillStyle=P.ln2; c.fillRect(x,y,cw,cw); continue; }
+      var v=V[r][cc], t=Math.max(-1,Math.min(1,v));
+      c.fillStyle = t>=0? 'rgba(44,106,78,'+(0.10+0.62*t)+')' : 'rgba(150,50,50,'+(0.10+0.62*(-t))+')';
+      c.fillRect(x,y,cw,cw);
+      c.strokeStyle=P.ln; c.lineWidth=1; c.strokeRect(x,y,cw,cw);
+      c.fillStyle=P.ink; c.font='12px ui-monospace,monospace'; c.textAlign='center';
+      c.fillText(v.toFixed(2),x+cw/2,y+cw*0.44);
+      if(!term(r,cc)&&sweeps>0){
+        var a=bestA(r,cc,g,noise), dx=[0,0,-1,1][a], dy=[-1,1,0,0][a];
+        var mx=x+cw/2, my=y+cw*0.70, L=cw*0.20;
+        c.strokeStyle=P.navy; c.lineWidth=2; c.lineCap='round';
+        c.beginPath(); c.moveTo(mx-dx*L,my-dy*L); c.lineTo(mx+dx*L,my+dy*L); c.stroke();
+        var hx=mx+dx*L, hy=my+dy*L, px=-dy, py=dx, hl=cw*0.10;
+        c.beginPath(); c.moveTo(hx,hy); c.lineTo(hx-dx*hl+px*hl*0.7,hy-dy*hl+py*hl*0.7);
+        c.lineTo(hx-dx*hl-px*hl*0.7,hy-dy*hl-py*hl*0.7); c.closePath(); c.fillStyle=P.navy; c.fill();
+      }
+      if(r===goal[0]&&cc===goal[1]){c.fillStyle=P.ok;c.font='bold 11px ui-monospace,monospace';c.fillText('+1 goal',x+cw/2,y+cw*0.80);}
+      if(r===pit[0]&&cc===pit[1]){c.fillStyle=P.bad;c.font='bold 11px ui-monospace,monospace';c.fillText('−1 pit',x+cw/2,y+cw*0.80);}
+    }
+    $('#vi-go').textContent=(+$('#vi-g').value/100).toFixed(2);
+    $('#vi-ro').textContent=(+$('#vi-r').value/100).toFixed(2);
+    $('#vi-no').textContent=(+$('#vi-n').value/100).toFixed(2);
+    $('#vi-out').textContent='sweeps: '+sweeps+'   max |V(k+1) − V(k)| = '+delta.toFixed(5)+
+      (sweeps===0?'   — press Sweep to apply the Bellman backup once.':delta<1e-4?'   — converged. Arrows are the greedy policy π*.':'   — still contracting by roughly a factor γ per sweep.');
+  }
+  $('#vi-step').addEventListener('click',function(){sweep();draw();});
+  $('#vi-run').addEventListener('click',function(){
+    if(anim){clearInterval(anim);anim=null;this.textContent='Run to convergence';return;}
+    this.textContent='Stop'; var self=this;
+    anim=setInterval(function(){ sweep(); draw(); if(delta<1e-4){clearInterval(anim);anim=null;self.textContent='Run to convergence';} },220);
+  });
+  $('#vi-reset').addEventListener('click',reset);
+  ['#vi-g','#vi-r','#vi-n'].forEach(function(id){$(id).addEventListener('input',function(){reset();});});
+  reset(); drawers.push(draw);
+})();
+
+/* ================= flashcards ================= */
+var DECKS={
+"Foundations":[
+["Inductive bias","The set of assumptions a learner uses to generalize beyond the training data. Split into restriction bias (what H can represent) and preference bias (which hypothesis in H the search reaches first)."],
+["Bias–variance decomposition","E[(y−ĥ)²] = bias² + variance + irreducible noise. Bias = error from too-rigid a model, doesn't shrink with data. Variance = sensitivity to the particular training sample, does shrink with data."],
+["Learning curve reading","Curves converge high and flat ⇒ high bias, more data won't help. Persistent gap with CV still falling ⇒ high variance, more data or regularization will help."],
+["Entropy H(X)","−Σ P(x) log₂ P(x). Expected bits to encode a draw. Maximal for a uniform distribution; 0 for a deterministic one."],
+["Mutual information","I(X;Y) = H(X) − H(X|Y). Symmetric, non-negative, zero iff independent. Information gain is exactly I(attribute; label)."],
+["KL divergence","D(P‖Q) = Σ P log(P/Q). Non-negative, zero iff P = Q, NOT symmetric and NOT a metric."],
+["Why stratified CV","Preserves class proportions in each fold, so folds are comparable and minority-class estimates aren't dominated by which fold got the rare examples."],
+["Occam's razor, formally","MDL: argmin length(h) + length(D|h). Taking −log₂ of the MAP objective turns 'prefer simple hypotheses' into a bit-counting statement."]
+],
+"Supervised":[
+["ID3 attribute choice","argmax information gain = H(S) − Σ (|Sv|/|S|)H(Sv). Greedy, top-down, no backtracking; the optimal tree problem is NP-hard."],
+["Gain's bias","Information gain favours many-valued attributes (a unique ID gets maximal gain). Fix with gain ratio (C4.5) or Gini."],
+["Decision tree bias","Restriction: axis-parallel splits. Preference: short trees, high-gain attributes near the root, correct over incorrect."],
+["Pre- vs post-pruning","Pre-pruning stops growth early (depth, min samples, gain threshold) and may miss splits that only pay off in combination. Post-pruning grows fully then removes subtrees against a validation set — usually stronger."],
+["Perceptron rule vs delta rule","Perceptron: Δw = η(y−ŷ)x on thresholded output; converges finitely only if linearly separable. Delta/LMS: Δw = η(y−w·x)x on the unthresholded activation; gradient descent, converges asymptotically even when not separable."],
+["Neural net bias","Restriction: almost none — one hidden layer approximates any continuous function. Preference: small initial weights + gradient descent prefer smooth, low-complexity functions, which is why early stopping regularizes."],
+["Vanishing gradient","σ′ = σ(1−σ) ≤ 0.25 for the sigmoid; multiplied across many layers the gradient shrinks geometrically. ReLU has σ′ ∈ {0,1}, avoiding it."],
+["SVM margin","Maximize 2/‖w‖ ⟺ minimize ½‖w‖² subject to yᵢ(w·xᵢ+b) ≥ 1. Soft margin adds C·Σξᵢ for slack."],
+["Support vectors","The training points with αᵢ > 0 — those on or inside the margin. Delete every other point and the classifier is unchanged."],
+["Kernel trick","The dual depends on data only through inner products, so replace ⟨x,z⟩ with K(x,z) and work implicitly in a higher- (even infinite-) dimensional space without ever computing φ."],
+["Mercer's condition","A valid kernel's Gram matrix must be symmetric positive semi-definite; that guarantees an implicit feature map exists."],
+["Effect of C and γ","C large ⇒ hard margin, low bias, high variance. γ large (RBF) ⇒ narrow kernels, wiggly boundary approaching 1-NN; γ small ⇒ near-linear."],
+["Bagging vs boosting","Bagging: independent bootstrap resamples, uniform vote, reduces variance, wants low-bias base learners. Boosting: sequential reweighting, weighted vote, reduces bias, wants weak learners, fragile to label noise."],
+["AdaBoost weight α","α = ½ ln((1−ε)/ε). Zero when the learner is a coin flip, unbounded as error → 0."],
+["Why boosting resists overfitting","Extra rounds keep increasing the margin (classification confidence) even after training error is 0, and generalization bounds depend on the margin distribution, not on the round count. Fails when labels are noisy."],
+["PAC learnability","With probability ≥ 1−δ, output h with true error ≤ ε, in samples and time polynomial in 1/ε, 1/δ. 'Approximately' = ε, 'probably' = δ."],
+["Haussler bound","m ≥ (1/ε)(ln|H| + ln(1/δ)) for a consistent learner on finite H. Agnostic version: m ≥ (1/2ε²)(ln|H| + ln(1/δ))."],
+["VC dimension","The largest d such that SOME set of d points is shattered (labelled in all 2^d ways) by H. Linear separators in ℝᵈ: d+1. A class is PAC-learnable iff its VC dimension is finite."],
+["Bayes optimal classifier","argmax_v Σ_h P(v|h)P(h|D) — vote all hypotheses weighted by posterior. No classifier with the same H and prior does better in expectation; usually intractable."],
+["Least squares = ML","Under y = f(x)+ε with Gaussian i.i.d. noise, maximizing likelihood is exactly minimizing squared error. L2 weight decay = a Gaussian prior = MAP."],
+["Naive Bayes","argmax_v P(v)·Π P(aᵢ|v). Independence is usually false but only the argmax must be right; probabilities are poorly calibrated. Use m-estimate smoothing for unseen pairs."]
+],
+"Optimization":[
+["Random restart hill climbing","Run greedy local search from k random starts. If a fraction p of starts fall in the global basin, expected restarts = 1/p and failure after k restarts = (1−p)^k."],
+["SA acceptance rule","Accept an improvement always; accept a worsening move with probability e^(ΔE/T). T→∞ is a random walk, T→0 is hill climbing."],
+["SA stationary distribution","At fixed T the chain settles into the Boltzmann distribution π(x) ∝ e^(f(x)/T). Slow enough (logarithmic) cooling converges to the global optimum with probability 1."],
+["GA operators","Selection (roulette / tournament / rank), crossover (one-point, n-point, uniform), mutation (bit flip). Elitism keeps the best individuals across generations."],
+["Building-block hypothesis","GAs work by recombining short, low-order, high-fitness schemata into better solutions. Deceptive problems, where low-order blocks mislead, break this."],
+["MIMIC in one line","Sample from a distribution over currently-good points, raise the fitness threshold, re-estimate the distribution as a dependency tree (max spanning tree over pairwise mutual information), repeat."],
+["When MIMIC wins","When fitness evaluations are expensive and variables interact: far fewer evaluations, at much higher cost per iteration. Always report both evaluations and wall clock."],
+["No free lunch","Averaged over all possible fitness functions every optimizer performs identically. Any claim that A beats B must name the problem structure that makes it so."],
+["Four Peaks","Rewards combining a prefix of 1s with a suffix of 0s; the two large basins are deceptive. GA and MIMIC beat local search because crossover/structure can combine independently found halves."]
+],
+"Unsupervised":[
+["Lloyd's algorithm","Alternate: assign each point to the nearest center; move each center to the mean of its points. Coordinate descent on within-cluster SSE."],
+["Why k-means terminates","Each step weakly decreases J, J ≥ 0 is bounded below, and there are finitely many partitions — so it cannot cycle. It reaches a LOCAL optimum; global k-means is NP-hard."],
+["k-means++","Seed the first center at random, then each subsequent center with probability ∝ squared distance to the nearest existing center. Gives an O(log k) expected approximation."],
+["k-means assumptions","Spherical, similar-size, similar-density clusters, Euclidean geometry. Sensitive to scale, outliers and initialization."],
+["EM for GMM","E-step: compute responsibilities γᵢⱼ = P(cluster j | xᵢ). M-step: re-estimate μ, Σ, π as responsibility-weighted statistics. Log-likelihood is monotonically non-decreasing."],
+["k-means vs EM","k-means is hard assignment / spherical / minimizes SSE / terminates finitely. EM is soft assignment / ellipsoidal / maximizes likelihood / converges only in the limit. k-means is the limit of GMM-EM with vanishing spherical covariance."],
+["Linkage types","Single = min pairwise (chaining, elongated shapes). Complete = max pairwise (compact, outlier-sensitive). Average = compromise. Ward = minimizes SSE increase, k-means-like."],
+["Kleinberg's impossibility","No clustering function satisfies richness, scale invariance and consistency at once. Any pair is achievable; all three are not. Clustering has no algorithm-independent 'correct' answer."],
+["Filtering vs wrapping","Filtering scores features by an intrinsic criterion, ignoring the learner — fast, misses interactions. Wrapping scores subsets by the learner's CV performance — slow, captures interaction and the learner's bias."],
+["Relevance vs usefulness","Strongly relevant: removing it alone hurts the Bayes optimal classifier. Weakly relevant: helps in combination with some subset. Usefulness is relative to a particular learner and its bias."],
+["PCA","Center (and scale), eigendecompose the covariance, keep the top-m eigenvectors. Maximizes retained variance ⟺ minimizes L2 reconstruction error. Components are orthogonal and ordered; eigenvalues are the variances."],
+["ICA","Assumes observations are linear mixtures of statistically independent, non-Gaussian sources; maximizes non-Gaussianity (kurtosis/negentropy). Recovers sources up to permutation and scale; cannot separate Gaussian sources."],
+["Random projection","Project onto random directions. Justified by Johnson–Lindenstrauss: pairwise distances are approximately preserved in O(log n / ε²) dimensions. Cheap, high variance across seeds — report the spread."],
+["PCA vs LDA","PCA is unsupervised and maximizes total variance; LDA uses labels and maximizes between-class over within-class scatter, giving at most (#classes − 1) directions."]
+],
+"Reinforcement":[
+["MDP","⟨S, A, T, R, γ⟩ with the Markov property: the next state depends only on the current state and action. Stationary T and R."],
+["Discount γ","Makes the infinite-horizon return finite (bounded by R_max/(1−γ)) and encodes patience. Effective horizon ≈ 1/(1−γ)."],
+["Bellman optimality","V*(s) = R(s) + γ max_a Σ T(s,a,s′)V*(s′). Q*(s,a) = R(s,a) + γ Σ T max_a′ Q*(s′,a′). Only Q lets you act without knowing T."],
+["Value iteration","Repeatedly apply the Bellman backup to V until it stops changing, then act greedily. O(|S|²|A|) per sweep; the greedy policy is usually optimal well before V converges."],
+["Policy iteration","Alternate exact policy evaluation (solve the linear system) with greedy policy improvement. Few iterations, each expensive; converges because policies are finite and each step strictly improves."],
+["Contraction argument","The Bellman operator is a γ-contraction in max norm, so by Banach it has a unique fixed point V* and value iteration converges to it geometrically from ANY initialization."],
+["Q-learning update","Q(s,a) ← Q(s,a) + α[r + γ max_a′ Q(s′,a′) − Q(s,a)]. Model-free and off-policy: it learns π* regardless of the behaviour policy."],
+["Q-learning convergence conditions","Every state–action pair visited infinitely often; learning rate satisfies Σα = ∞ and Σα² < ∞; finite MDP with bounded rewards."],
+["Q-learning vs SARSA","Q-learning's target uses max over next actions (off-policy, learns the optimal possibly-risky path). SARSA uses the action actually taken (on-policy, prices in exploration mistakes, learns safer paths)."],
+["TD(λ)","Eligibility traces interpolate between TD(0) (λ=0, one-step bootstrap, low variance, biased) and Monte Carlo (λ=1, full return, unbiased, high variance). Intermediate λ usually best."],
+["Exploration strategies","ε-greedy (uniform random with prob. ε, decay it), softmax/Boltzmann P(a) ∝ e^(Q/τ), optimistic initialization, UCB: Q + c√(ln t / N(a))."],
+["Potential-based shaping","F(s,s′) = γΦ(s′) − Φ(s) for any Φ leaves the optimal policy provably unchanged. Arbitrary shaping rewards can create reward loops and change π*."],
+["Model-based vs model-free","Model-based (VI/PI/Dyna/R-max) needs or learns T and R and is sample-efficient but suffers from model error. Model-free (Q-learning/SARSA/TD) needs no model but needs far more experience."],
+["POMDP","State is not observable; act on a belief state — a distribution over states updated by Bayes rule from observations. The belief MDP is continuous-state and generally intractable to solve exactly."],
+["Nash equilibrium","A joint strategy where no player improves by deviating unilaterally. Every finite game has one in mixed strategies; in two-player zero-sum games the minimax value equals the Nash value."]
+]};
+(function(){
+  var names=Object.keys(DECKS), cur=names[0], list=[], i=0, flipped=false;
+  var bar=$('#deckbar'), card=$('#card'), txt=$('#cardtxt'), side=$('#cardside'), pos=$('#cpos');
+  function shuffle(a){ for(var j=a.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1));var t=a[j];a[j]=a[k];a[k]=t;} return a; }
+  function load(n){ cur=n; list=shuffle(DECKS[n].slice()); i=0; flipped=false; render();
+    $$('.btn',bar).forEach(function(b){b.classList.toggle('p',b.textContent.indexOf(n)===0);}); }
+  function render(){
+    var c=list[i]; if(!c)return;
+    side.textContent=flipped?'Answer':'Prompt';
+    txt.textContent=flipped?c[1]:c[0];
+    txt.className='txt'+(flipped?' a':'');
+    pos.textContent=(i+1)+' / '+list.length+' · '+cur;
+  }
+  names.forEach(function(n){ var b=document.createElement('button'); b.className='btn';
+    b.textContent=n+' ('+DECKS[n].length+')'; b.addEventListener('click',function(){load(n);}); bar.appendChild(b); });
+  card.addEventListener('click',function(){flipped=!flipped;render();});
+  card.addEventListener('keydown',function(e){ if(e.key===' '||e.key==='Enter'){e.preventDefault();flipped=!flipped;render();} });
+  $('#cnext').addEventListener('click',function(){i=(i+1)%list.length;flipped=false;render();});
+  $('#cprev').addEventListener('click',function(){i=(i-1+list.length)%list.length;flipped=false;render();});
+  $('#cshuf').addEventListener('click',function(){load(cur);});
+  document.addEventListener('keydown',function(e){
+    if(document.activeElement===$('#q'))return;
+    if(e.key==='ArrowRight'){i=(i+1)%list.length;flipped=false;render();}
+    if(e.key==='ArrowLeft'){i=(i-1+list.length)%list.length;flipped=false;render();}
+  });
+  load(names[0]);
+})();
+})();
+</script>
+</body></html>

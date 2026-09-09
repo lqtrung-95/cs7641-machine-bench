@@ -19,6 +19,10 @@ A single-page, self-contained review site for Georgia Tech OMSCS **CS 7641: Mach
   step-by-step, and value iteration on a stochastic gridworld with the greedy policy drawn.
 - **67 flashcards** in five decks, 10 self-test questions, and a night-before cheatsheet
   (formula table, "which algorithm when", common traps, Mitchell chapter map).
+- **Week-by-week schedule** synced to the Fall 2026 syllabus — a "this week" banner plus a full
+  16-week table (lessons, due dates), auto-highlighted from the browser's clock. Lessons with no
+  matching topic on the site yet are marked "not here yet" instead of link. Edit the `SCHED` array
+  in the script if your section's dates differ.
 - Full-text search, per-topic progress tracking (`localStorage`), light/dark/system themes.
 
 ## Running it

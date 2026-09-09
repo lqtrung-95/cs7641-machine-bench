@@ -162,6 +162,32 @@ details.qa .ans p:first-child{margin-top:0}
 .mini p{margin:0; font-size:14.5px; color:var(--muted)}
 .mini ul{margin:6px 0 0; padding-left:18px; font-size:14.5px; color:var(--muted)}
 
+/* ---------- weekly schedule ---------- */
+.schedbtn{display:block; text-align:center; font:inherit; font-size:12.5px; font-weight:600; padding:8px 11px;
+  border-radius:7px; border:1px solid var(--gold-bright); background:var(--gold-soft); color:var(--ink); text-decoration:none}
+.schedbtn:hover{background:var(--gold-bright); color:var(--bg)}
+.weekband{margin:26px 0 0}
+.wkcard{border:1px solid var(--line-2); border-radius:14px; background:var(--gold-soft); padding:20px 24px; box-shadow:var(--shadow)}
+.wktop{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:2px}
+.wktop .tag{font-family:var(--mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold)}
+.wkcountdown{font-family:var(--mono); font-size:12px; color:var(--muted)}
+.wkcard h3{font-family:var(--display); font-weight:600; font-size:19px; margin:8px 0 10px}
+.wklink{display:inline-block; margin-top:12px; font-size:13.5px; font-weight:600}
+.scheddue{font-size:14px; color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
+  border-radius:8px; padding:9px 13px; margin-top:12px}
+.scheddue div{margin:2px 0}
+.scheddue.muted{color:var(--faint); background:transparent; border-style:dashed; font-size:13px}
+.pill.gap{border-style:dashed; color:var(--faint); background:transparent}
+.schedwrap{margin:10px 0 30px}
+.schedrow{display:grid; grid-template-columns:160px 1fr 240px; gap:16px; padding:16px 0; border-bottom:1px solid var(--line); align-items:start}
+.schedrow.cur{background:var(--gold-soft); border-radius:10px; padding:14px 16px; margin:4px 0; border-bottom-color:transparent}
+.schedrow.past{opacity:.55}
+.schedwk{font-family:var(--mono); font-size:12px; color:var(--muted)}
+.schedwk b{display:block; font-family:var(--display); font-size:16px; color:var(--ink); font-weight:600; margin-bottom:2px}
+.schedlessons{display:flex; flex-wrap:wrap; gap:6px; align-content:flex-start}
+.schedrow .scheddue{margin-top:0}
+@media(max-width:760px){.schedrow{grid-template-columns:1fr}}
+
 /* ---------- demos ---------- */
 .demo{border:1px solid var(--line-2); border-radius:12px; background:var(--surface); margin:20px 0;
   box-shadow:var(--shadow); overflow:hidden}
@@ -215,6 +241,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
   <div class="railtools">
     <input id="q" type="search" placeholder="Search all topics…" autocomplete="off">
     <div class="progwrap"><div class="progbar"><i id="pbar"></i></div><span class="progtxt" id="ptxt">0/0</span></div>
+    <a class="schedbtn" href="#schedule" id="schedbtn">📅 This week</a>
   </div>
   <nav id="toc"></nav>
   <div class="railfoot">
@@ -230,13 +257,22 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
   <p class="dek">A review bench for Isbell &amp; Littman's four units — <em>supervised learning</em>, <em>randomized optimization</em>, <em>unsupervised learning</em>, <em>reinforcement learning</em>. Derivations you can reproduce on paper, the pitfalls that cost report points, and live widgets for the algorithms that only make sense in motion.</p>
   <div class="facts">
     <div><b>4</b><span>units</span></div>
-    <div><b>32</b><span>topics</span></div>
+    <div><b>34</b><span>topics</span></div>
     <div><b>6</b><span>live demos</span></div>
     <div><b>60+</b><span>flashcards</span></div>
     <div><b>Mitchell</b><span>+ Sutton &amp; Barto</span></div>
   </div>
 </div></header>
 <div class="wrap">
+<div class="weekband" id="weekband"></div>
+<section id="schedule">
+<div class="unithead"><div>
+  <div class="tag">Fall 2026 · syllabus-synced</div>
+  <h2>Course schedule</h2>
+  <p>Every lesson and deadline from the Canvas syllabus, in order, linked to the matching topic on this site where one exists. The current week is highlighted automatically — no setup needed.</p>
+</div></div>
+<div class="schedwrap" id="schedwrap"></div>
+</section>
 <div id="nores">No topic matches that. Try a shorter term — <code>VC</code>, <code>kernel</code>, <code>Bellman</code>.</div>
 <section class="unit" id="u0" data-unit="Foundations">
 <div class="unithead"><div>
@@ -362,6 +398,37 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 <div class="eq">Gini(S) = 1 − Σ<sub>i</sub> p<sub>i</sub>² &nbsp;&nbsp;vs&nbsp;&nbsp; H(S) = − Σ<sub>i</sub> p<sub>i</sub> log₂ p<sub>i</sub><small>Both peak at the uniform distribution; Gini is cheaper (no log) and nearly always picks the same split</small></div>
 <div class="note trap"><span class="lab">Where points get lost</span><p>Saying deeper trees are "more accurate." Deeper trees have <em>lower training error</em> and higher variance. In a report, the depth-vs-CV-error curve is the evidence; the sentence is "past depth d the tree begins fitting sample-specific noise, and CV error rises while train error goes to zero."</p></div>
 <details class="qa"><summary>Why can a decision tree represent any boolean function, and what does that cost?</summary><div class="ans"><p>With enough depth you can enumerate every row of the truth table as a root-to-leaf path — so the restriction bias for discrete inputs is essentially none. The cost is size: parity/XOR over <span class="m">n</span> attributes needs <span class="m">O(2ⁿ)</span> nodes because no single attribute has any information gain on its own, so the greedy heuristic is also blind at the root.</p></div></details>
+</article>
+
+<article class="topic" id="t-reg">
+<h3>Regression &amp; classification: the linear baseline</h3>
+<p class="lede">Two questions, one machinery. Regression predicts a continuous <span class="m">y</span>; classification predicts a discrete one — and the cheapest way to build either is a linear function of the inputs, fit by minimizing a loss.</p>
+<div class="eq">ŷ = w·x + b<small>Linear regression: choose w, b to minimize squared error over the training set</small></div>
+<h4>Least squares, two ways</h4>
+<ul>
+<li><b>Closed form</b> — <span class="m">w* = (XᵀX)⁻¹Xᵀy</span>, the normal equations. Exact, but needs <span class="m">XᵀX</span> invertible and costs <span class="m">O(d³)</span> to solve — fine for small <span class="m">d</span>, not for wide feature spaces.</li>
+<li><b>Gradient descent</b> — <span class="m">w ← w − α∇<sub>w</sub>J(w)</span> on the same objective. Same optimum for a convex loss, but this is the version that generalizes: swap the loss and you get logistic regression below; add layers and it is exactly the update rule Unit 1's neural-net topic calls backprop.</li>
+</ul>
+<div class="note key"><span class="lab">Why this sits between trees and neural nets</span><p>Trees search combinatorially over splits. Linear and logistic regression are the two-line version of everything after them: pick a hypothesis class, pick a loss, minimize it continuously over weights instead.</p></div>
+<h4>Classification from a regressor: logistic regression</h4>
+<p>Thresholding a linear regressor at 0.5 is not calibrated — nothing constrains the output to <span class="m">[0,1]</span>, and squared error over-penalizes confident correct predictions. Logistic regression instead squashes the linear score through a sigmoid and fits by maximum likelihood:</p>
+<div class="eq">P(y=1 | x) = σ(w·x + b) = 1 / (1 + e<sup>−(w·x+b)</sup>)<small>Decision boundary P = 0.5 ⟺ w·x + b = 0 — still linear, just in the log-odds</small></div>
+<div class="eq">J(w) = −Σᵢ [yᵢ log ŷᵢ + (1−yᵢ) log(1−ŷᵢ)]<small>Cross-entropy / log loss — the MLE objective, convex, no closed form; solved by gradient descent</small></div>
+<h4>The knob that matters is complexity, not the algorithm name</h4>
+<ul>
+<li><b>Polynomial features</b> make a linear model nonlinear in <span class="m">x</span> while staying linear in the weights — same fit machinery, richer hypothesis space, the same bias–variance trade-off as <a href="#t-biasvar">the learning-curve topic</a>: degree too low underfits, too high memorizes and swings wildly between points.</li>
+<li><b>Regularization</b> is the other dial. Ridge (<span class="m">L2</span>) shrinks every weight toward 0 and handles correlated features gracefully; LASSO (<span class="m">L1</span>) drives some weights to exactly 0, performing feature selection as a side effect.</li>
+</ul>
+<div class="eq">J<sub>ridge</sub>(w) = Σᵢ(yᵢ − ŷᵢ)² + λ‖w‖₂²<small>λ trades training fit for smaller weights — λ = 0 is plain least squares, λ → ∞ forces w → 0</small></div>
+<div class="tblwrap"><table>
+<tr><th></th><th>Linear regression</th><th>Logistic regression</th></tr>
+<tr><td>Predicts</td><td class="num">ŷ ∈ ℝ</td><td class="num">P(y=1|x) ∈ (0,1)</td></tr>
+<tr><td>Loss</td><td>Squared error</td><td>Cross-entropy</td></tr>
+<tr><td>Fit</td><td>Closed form or GD</td><td>GD / Newton — no closed form</td></tr>
+<tr><td>Bias</td><td>Restriction: hyperplane; preference: min squared error</td><td>Restriction: linear log-odds boundary</td></tr>
+</table></div>
+<div class="note trap"><span class="lab">Where points get lost</span><p>Scoring a probabilistic classifier with accuracy or squared error hides miscalibration — confidently wrong looks the same as honestly uncertain. Use log loss or AUC for logistic regression, not a regression metric or a bare hit rate, and say why in the report.</p></div>
+<details class="qa"><summary>The logistic regression loss is convex — so why is there no closed-form solution?</summary><div class="ans"><p>Cross-entropy composed with a sigmoid is convex in <span class="m">w</span> — a single global minimum — but setting its gradient to zero gives a transcendental equation (the sigmoid appears inside the sum with no algebraic inverse), not a linear system like squared error's normal equations. Convexity guarantees gradient descent finds the optimum; it does not hand you a formula for it.</p></div></details>
 </article>
 
 <article class="topic" id="t-knn">
@@ -858,6 +925,34 @@ until π′ = π</div><p style="margin-top:8px">Evaluation costs <span class="m"
 <div class="note"><span class="lab">Reward shaping</span><p>Adding intermediate rewards speeds learning but can change the optimal policy — the classic failure is an agent that farms the shaping reward in a loop instead of finishing. <b>Potential-based shaping</b> is the safe form: <span class="m">F(s,s′) = γΦ(s′) − Φ(s)</span> for any potential function <span class="m">Φ</span>. It provably leaves the optimal policy unchanged, and naming it is worth a mark whenever shaping comes up.</p></div>
 </article>
 
+<article class="topic" id="t-gt">
+<h3>Game theory: when the environment has its own agenda</h3>
+<p class="lede">Everything since <a href="#t-mdp">MDPs</a> assumed one agent against a stationary world. Game theory is what happens when the "environment" is one or more other agents optimizing their own reward — the course's other major thread from Littman's own research (minimax-Q, 1994).</p>
+<h4>Normal-form games</h4>
+<p>A game is players, an action set per player, and a payoff for every action profile. Two ideas decide most of what you're asked to reason about:</p>
+<ul>
+<li><b>Dominant strategy</b> — an action at least as good as any other, against every possible action of the opponents. <b>Iterated elimination of dominated strategies</b> can shrink a game before any equilibrium search.</li>
+<li><b>Zero-sum vs general-sum</b> — in zero-sum, one player's gain is exactly the other's loss (<span class="m">Σ payoffs = 0</span>); general-sum allows both to win or both to lose, which is where cooperation and threats become possible.</li>
+</ul>
+<div class="tblwrap"><table>
+<tr><th></th><th>Player 2: Cooperate</th><th>Player 2: Defect</th></tr>
+<tr><td>Player 1: Cooperate</td><td class="num">−1, −1</td><td class="num">−3, 0</td></tr>
+<tr><td>Player 1: Defect</td><td class="num">0, −3</td><td class="num">−2, −2</td></tr>
+</table></div>
+<p>Prisoner's dilemma: <b>Defect dominates</b> for both players individually, so (Defect, Defect) is the unique Nash equilibrium — even though (Cooperate, Cooperate) is <b>Pareto-superior</b> for both. Nash equilibrium is a statement about no player having a unilateral incentive to deviate, not about the outcome being good.</p>
+<h4>Nash equilibrium, and the zero-sum special case</h4>
+<div class="note key"><span class="lab">Definition</span><p>A strategy profile is a <b>Nash equilibrium</b> if no player can improve their payoff by unilaterally changing their own strategy, holding everyone else's fixed. Every finite game has at least one — possibly in <b>mixed strategies</b> (a probability distribution over actions, needed whenever no pure-strategy equilibrium exists, e.g. matching pennies / rock–paper–scissors).</p></div>
+<p>In two-player zero-sum games, Nash equilibrium coincides with the <b>minimax</b> solution — von Neumann's minimax theorem guarantees <span class="m">max<sub>π₁</sub> min<sub>π₂</sub> V = min<sub>π₂</sub> max<sub>π₁</sub> V</span>, so "play your best strategy assuming the worst-case opponent" is not just cautious, it is optimal. That value is computable by linear programming, and it is exactly what minimax-Q generalizes to sequential games.</p>
+<div class="eq">V* = max<sub>π₁</sub> min<sub>a₂</sub> Σ<sub>a₁</sub> π₁(a₁)·R(a₁,a₂)<small>The minimax value of a matrix game — the best guaranteed payoff against an adversarial opponent</small></div>
+<h4>Repeated games: how cooperation survives self-interest</h4>
+<p>Play the prisoner's dilemma once and defection wins. Play it an unknown or infinite number of times and the calculus changes: a strategy like <b>grim trigger</b> (cooperate until the opponent ever defects, then defect forever) or <b>tit-for-tat</b> makes future cooperation conditional on past behaviour, turning "defect now" into a threat against future payoff.</p>
+<div class="note trap"><span class="lab">Where points get lost</span><p>The <b>folk theorem</b> says any individually rational, feasible payoff can be sustained as a Nash equilibrium of the infinitely repeated game <em>if the discount factor is high enough</em> — a low discount factor (impatient players, or a game likely to end soon) collapses back to the one-shot equilibrium, and backward induction unravels cooperation entirely in a game with a known, finite horizon. State the discount-factor condition, not just "repetition enables cooperation."</p></div>
+<h4>Stochastic games: multi-agent MDPs</h4>
+<p>A <b>stochastic (Markov) game</b> generalizes an MDP to multiple agents: state, joint actions, a transition function shared by everyone, and <em>one reward function per agent</em>. Zero-sum stochastic games have a well-defined value found by minimax-Q — Q-learning's update with the max over the learner's own action replaced by the minimax value of the one-shot game at each state:</p>
+<div class="eq">Q(s,a₁,a₂) ← Q(s,a₁,a₂) + α[r + γ·minimax<sub>π₁</sub> Q(s′,π₁,·) − Q(s,a₁,a₂)]<small>Minimax-Q (Littman, 1994) — converges to the equilibrium value under the same conditions as single-agent Q-learning</small></div>
+<p>General-sum stochastic games are harder: no single "the" equilibrium value in general, multiple equilibria can coexist, and an agent's optimal policy depends on beliefs about what the others will do — why multi-agent RL is still an open problem rather than a solved special case of Unit 4.</p>
+</article>
+
 <article class="topic" id="t-rladv">
 <h3>Model-based vs model-free, and where the field goes next</h3>
 <div class="tblwrap"><table>
@@ -871,7 +966,7 @@ until π′ = π</div><p style="margin-top:8px">Evaluation costs <span class="m"
 <ul>
 <li><b>Function approximation.</b> Tabular Q needs a cell per state–action pair, so it dies on large or continuous state spaces. Replace the table with <span class="m">Q(s,a;θ)</span> — linear features or a neural net. The cost is that convergence guarantees weaken: the "deadly triad" of bootstrapping + off-policy + function approximation can diverge.</li>
 <li><b>POMDPs.</b> When the state is not observable, act on a <b>belief state</b> — a probability distribution over states, updated by Bayes rule from observations. The belief MDP is a continuous-state MDP, and solving it exactly is intractable in general.</li>
-<li><b>Game theory / multi-agent.</b> When another learner shares the environment it is no longer stationary. Know: a <b>Nash equilibrium</b> is a joint strategy where no player gains by unilateral deviation; every finite game has one in mixed strategies; two-player zero-sum games are solved by <b>minimax</b> (and the minimax value equals the Nash value); the prisoner's dilemma shows the Nash equilibrium can be Pareto-dominated; and repeated play with the <b>folly of a fixed horizon</b> unravels cooperation by backward induction while an indefinite horizon (via <span class="m">γ</span>) can sustain it — the <b>folk theorem</b>.</li>
+<li><b>Game theory / multi-agent.</b> When another learner shares the environment it is no longer stationary — see <a href="#t-gt">the game-theory topic</a> for Nash equilibrium, minimax, and minimax-Q.</li>
 </ul>
 <div class="note key"><span class="lab">Assignment 4 tactic</span><p>Pick two MDPs that differ deliberately — a small gridworld (say 5×5) and a large or highly stochastic one (say 20×20, or a non-grid problem) — so you can show how VI/PI/Q-learning scale differently. Report, for each: iterations to convergence, wall clock, the resulting policy (plot the arrow grid), and reward per episode. The analysis worth writing is about the crossovers: PI converges in fewer iterations but each is more expensive; Q-learning needs orders of magnitude more samples but no model; raising <span class="m">γ</span> slows every method and can change the optimal policy qualitatively — show that with two policy plots side by side.</p></div>
 </article>
@@ -1042,6 +1137,74 @@ var obs=new IntersectionObserver(function(es){
   es.forEach(function(e){ if(e.isIntersecting){ for(var k in links)links[k].classList.remove('on'); var l=links[e.target.id]; if(l)l.classList.add('on'); } });
 },{rootMargin:'-15% 0px -70% 0px'});
 topics.forEach(function(t){obs.observe(t);});
+
+/* ---------- weekly schedule ---------- */
+(function(){
+  // one row per Saturday content-release week, from the Fall 2026 Canvas syllabus.
+  // id:null means the lesson has no matching topic on this site yet.
+  var SCHED=[
+    {wk:1,  start:'2026-08-29', lessons:[{t:'ML is the ROX',id:'t-ml-def'},{t:'SL 1 · Decision Trees',id:'t-dt'}], due:[]},
+    {wk:2,  start:'2026-09-05', lessons:[{t:'SL 2 · Regression & Classification',id:'t-reg'},{t:'SL 3 · Neural Networks',id:'t-nn'}], due:[{t:'Reading/Writing Quiz + Setup Check',d:'Mon Sep 7, 6:59pm'}]},
+    {wk:3,  start:'2026-09-12', lessons:[{t:'SL 4 · Instance-Based Learning',id:'t-knn'},{t:'SL 5 · Ensemble Learning',id:'t-ens'}], due:[]},
+    {wk:4,  start:'2026-09-19', lessons:[{t:'SL 6 · Kernel Methods & SVMs',id:'t-svm'}], due:[]},
+    {wk:5,  start:'2026-09-26', lessons:[{t:'SL 7–8 · Comp. Learning Theory & VC Dimensions',id:'t-clt'}], due:[{t:'SL Report + SL Unit Quiz',d:'Mon Sep 28, 6:59pm'}]},
+    {wk:6,  start:'2026-10-03', lessons:[{t:'OL 1 · Randomized Optimization',id:'t-ro-setup'},{t:'OL 2 · Deconstructing AdamW',id:null}], due:[{t:'SL Report Discussion',d:'Mon Oct 5, 6:59pm'}]},
+    {wk:7,  start:'2026-10-10', lessons:[{t:'OL 3 · Information Theory',id:'t-info'}], due:[]},
+    {wk:8,  start:'2026-10-17', lessons:[{t:'OL 4 · Bayesian Learning',id:'t-bayes'},{t:'OL 5 · Bayesian Inference',id:null}], due:[{t:'OL Report + OL Unit Quiz',d:'Mon Oct 19, 6:59pm'}]},
+    {wk:9,  start:'2026-10-24', lessons:[{t:'UL 1 · Clustering',id:'t-kmeans'}], due:[{t:'OL Report Discussion',d:'Mon Oct 26, 6:59pm'},{t:'Withdrawal deadline',d:'Wed Oct 28'}]},
+    {wk:10, start:'2026-10-31', lessons:[{t:'UL 2 · Feature Selection',id:'t-fs'},{t:'UL 3 · Feature Transformation',id:'t-dr'}], due:[]},
+    {wk:11, start:'2026-11-07', lessons:[{t:'UL 4 · Manifold Learning',id:null}], due:[{t:'UL Unit Quiz',d:'Mon Nov 9, 7:59pm'},{t:'UL Report',d:'Wed Nov 11, 7:59pm'}]},
+    {wk:12, start:'2026-11-14', lessons:[{t:'RL 1 · Markov Decision Processes',id:'t-mdp'},{t:'RL 2 · Reinforcement Learning',id:'t-bellman'}], due:[{t:'UL Report Discussion',d:'Wed Nov 18, 7:59pm'}]},
+    {wk:13, start:'2026-11-21', lessons:[{t:'RL 3–4 · Game Theory',id:'t-gt'}], due:[]},
+    {wk:14, start:'2026-11-28', lessons:[{t:'RL 5 · Horizon of Variants',id:null}], due:[{t:'RL Report + RL Unit Quiz',d:'Mon Nov 30, 7:59pm'}]},
+    {wk:15, start:'2026-12-05', lessons:[], due:[{t:'RL Report Discussion',d:'Mon Dec 7, 7:59pm'},{t:'Problem Set',d:'Wed Dec 9, 7:59pm'}]},
+    {wk:16, start:'2026-12-10', lessons:[], due:[{t:'Final exam quiz',d:'Thu Dec 17, 11:59am'},{t:'CIOS survey + Ed participation',d:'end of term'}]}
+  ];
+  var today=new Date();
+  SCHED.forEach(function(w,i){
+    w._start=new Date(w.start+'T00:00:00');
+    w._end = i+1<SCHED.length ? new Date(SCHED[i+1].start+'T00:00:00') : new Date(w._start.getTime()+7*864e5);
+  });
+  var curIdx=-1;
+  SCHED.forEach(function(w,i){ if(today>=w._start && today<w._end) curIdx=i; });
+  if(curIdx<0) curIdx = today<SCHED[0]._start ? 0 : SCHED.length-1;
+
+  function fmtRange(w){
+    var opt={month:'short',day:'numeric'}, endDisp=new Date(w._end.getTime()-864e5);
+    return w._start.toLocaleDateString('en-US',opt)+' – '+endDisp.toLocaleDateString('en-US',opt)+', '+w._start.getFullYear();
+  }
+  function lessonPill(l){
+    return l.id ? '<a class="pill b" href="#'+l.id+'">'+l.t+'</a>'
+                : '<span class="pill gap" title="Not covered on this site yet">'+l.t+' · not here yet</span>';
+  }
+  function dueBlock(due){
+    if(!due.length) return '<div class="scheddue muted">No deliverables due this week</div>';
+    return '<div class="scheddue">'+due.map(function(x){return '<div>⏰ <b>'+x.t+'</b> — '+x.d+'</div>';}).join('')+'</div>';
+  }
+
+  var wb=$('#weekband');
+  if(wb){
+    var w=SCHED[curIdx], span=Math.round((w._end-w._start)/864e5), dayNum=Math.min(span,Math.max(1,Math.floor((today-w._start)/864e5)+1));
+    wb.innerHTML='<div class="wkcard">'
+      +'<div class="wktop"><span class="tag">Week '+w.wk+' of '+SCHED.length+' · '+fmtRange(w)+'</span><span class="wkcountdown">day '+dayNum+' of '+span+'</span></div>'
+      +'<h3>This week’s lessons</h3>'
+      +'<div class="pillrow">'+(w.lessons.length?w.lessons.map(lessonPill).join(''):'<span class="pill">No new lessons this week — deliverables only</span>')+'</div>'
+      +dueBlock(w.due)
+      +'<a class="wklink" href="#schedule">Full course schedule ↓</a>'
+      +'</div>';
+  }
+  var sw=$('#schedwrap');
+  if(sw){
+    sw.innerHTML=SCHED.map(function(w,i){
+      var cls = i===curIdx?'cur':(w._end<=today?'past':'');
+      return '<div class="schedrow '+cls+'">'
+        +'<div class="schedwk"><b>Week '+w.wk+'</b>'+fmtRange(w)+(i===curIdx?' · you are here':'')+'</div>'
+        +'<div class="schedlessons">'+(w.lessons.length?w.lessons.map(lessonPill).join(''):'<span class="pill">—</span>')+'</div>'
+        +dueBlock(w.due)
+        +'</div>';
+    }).join('');
+  }
+})();
 
 /* ---------- search ---------- */
 var idx=topics.map(function(t){return {el:t,txt:t.textContent.toLowerCase()};});

@@ -288,6 +288,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-ml-def">
 <h3>What "learning" means here</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Imagine three ways to learn to recognize dogs. Someone shows you photos labeled "dog" or "not dog" (<b>supervised</b>) — you learn from answers. Someone hands you a pile of random photos with no labels at all, and you sort them into piles that seem to go together (<b>unsupervised</b>) — you learn by noticing patterns. Or you're a puppy bumping into furniture, and the only feedback is "ouch" sometimes, way after you took the wrong turn (<b>reinforcement</b>) — you learn from consequences that show up late.</p></div></details>
 <p class="lede">Mitchell's definition is the one the course leans on: a program learns from experience <span class="m">E</span> with respect to task <span class="m">T</span> and performance measure <span class="m">P</span> if its performance at <span class="m">T</span>, measured by <span class="m">P</span>, improves with <span class="m">E</span>. Every design decision you make in an assignment is a choice of one of those three letters.</p>
 <p>Isbell and Littman frame the whole course as <b>generalization</b>, not memorization: induction from examples to a function that behaves on data you have never seen. The three families map cleanly onto what supervision you are given:</p>
 <div class="tblwrap"><table>
@@ -352,6 +353,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-eval">
 <h3>Evaluation you can defend</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Imagine studying for a test using the actual test questions, then bragging about your perfect score — that doesn't prove you learned anything, it proves you memorized the answer key. That's why you never touch the real test set until the very end: you practice and tune on separate practice questions (cross-validation) so your final score on the real test actually means something.</p></div></details>
 <p>The test set is a one-shot instrument. Every choice you make after looking at it leaks. The defensible pipeline:</p>
 <div class="block"><b>split</b> train / test once, stratified, fixed seed
 <b>tune</b> hyper-parameters by k-fold CV <i>inside</i> train only (k = 5 or 10)
@@ -383,6 +385,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-dt">
 <h3>Decision trees &amp; ID3</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>It's exactly like the game 20 Questions — you ask the single most useful yes/no question first (the one that narrows things down fastest), then based on the answer, ask the next most useful question, and so on, until you can confidently guess. A decision tree is just that game written down as a flowchart, and "training" the tree means figuring out the best order to ask the questions.</p></div></details>
 <p class="lede">A tree is a sequence of questions; learning one is choosing the order of the questions. ID3 is greedy and top-down: pick the attribute with the highest information gain, split, recurse.</p>
 <div class="block"><b>ID3</b>(Examples, Target, Attributes)
   if all Examples have same label → return leaf(label)
@@ -410,6 +413,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-reg">
 <h3>Regression &amp; classification: the linear baseline</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>If someone asks "how tall will this kid be as an adult?" that's a number — <b>regression</b>. If they ask "is this kid going to prefer basketball or soccer?" that's a category — <b>classification</b>. Both jobs can use the exact same tool: draw the best straight line through what you know, then either read a number off it (regression) or check which side of the line you land on (classification).</p></div></details>
 <p class="lede">Two questions, one machinery. Regression predicts a continuous <span class="m">y</span>; classification predicts a discrete one — and the cheapest way to build either is a linear function of the inputs, fit by minimizing a loss.</p>
 <div class="eq">ŷ = w·x + b<small>Linear regression: choose w, b to minimize squared error over the training set</small></div>
 <h4>Least squares, two ways</h4>
@@ -441,6 +445,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-knn">
 <h3>Instance-based learning: k-NN</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Imagine you move to a new neighborhood and want to guess if you'll like living there — instead of studying any rules, you just go ask your 5 nearest neighbors what they think, and go with whatever most of them say. k-NN never builds a rulebook at all; it just remembers every neighbor's opinion and, whenever you ask a new question, looks up whoever is closest and copies their answer.</p></div></details>
 <p class="lede">Lazy learning: keep the data, defer all work to query time. There is no model — the training set <em>is</em> the model.</p>
 <div class="tblwrap"><table>
 <tr><th></th><th>Lazy (k-NN)</th><th>Eager (tree, net, SVM)</th></tr>
@@ -525,6 +530,7 @@ update:   W ← W − η ∂E/∂W        (chain rule, reused bottom-up)</div>
 
 <article class="topic" id="t-ens">
 <h3>Ensembles: bagging &amp; boosting</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>One weather forecaster is often wrong. But if you ask 100 forecasters — each having seen slightly different data — and go with the majority vote, you usually do better than any single one (that's <b>bagging</b>). Or you could train forecasters one after another, where each new one is specifically told to focus hardest on the days the previous forecasters got wrong (that's <b>boosting</b>) — a team that keeps patching its own mistakes.</p></div></details>
 <p class="lede">Combine many weak rules into one strong one. Bagging attacks variance; boosting attacks bias — and that difference is the most-asked ensemble question in this course.</p>
 <div class="tblwrap"><table>
 <tr><th></th><th>Bagging (bootstrap aggregating)</th><th>Boosting (AdaBoost)</th></tr>
@@ -598,6 +604,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-slcompare">
 <h3>The five-algorithm comparison table</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>It's like choosing a tool from a toolbox: a hammer is great for nails but terrible for screws. There's no single "best" learning algorithm for every job — trees are great when you need to explain your answer, k-NN is great when new examples keep showing up, neural nets are great when you have tons of data. This table is just a cheat sheet for "which tool for which job."</p></div></details>
 <p>Keep this in your head for the exam and paste its logic (not the table) into the SL report's conclusion.</p>
 <div class="tblwrap"><table>
 <tr><th>Algorithm</th><th>Train</th><th>Query</th><th>Scaling needed</th><th>Handles nonlinearity</th><th>Main overfit control</th><th>Interpretable</th></tr>
@@ -627,6 +634,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-ro-setup">
 <h3>The framing: what each algorithm keeps</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Four searchers are all looking for the tallest mountain peak on a foggy map, using only their feet — no map, no satellite view. They differ only in what each one remembers as they search: one remembers just where they're standing right now, one also remembers a bit of randomness to escape dead ends, one keeps a whole population of searchers who can "have babies" together, and one keeps a running theory about what mountain-shapes tend to look like.</p></div></details>
 <p class="lede">The cleanest way to order this unit is by memory. Every step up the ladder retains more information about the search so far, and pays for it in evaluations per iteration.</p>
 <div class="tblwrap"><table>
 <tr><th>Algorithm</th><th>What it retains</th><th>Per-iteration cost</th><th>Wins when</th></tr>
@@ -641,6 +649,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-hc">
 <h3>Hill climbing &amp; random restarts</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You're blindfolded on a hilly field, trying to find the highest point, and the only thing you can do is feel which direction goes up and take a step that way. You'll definitely reach a peak — but maybe not the highest peak, just whichever hill you happened to start closest to. <b>Random restarts</b> just means: teleport somewhere else at random and climb again, several times, then keep whichever peak was tallest.</p></div></details>
 <div class="block"><b>RHC</b>(f, N):
   x ← random point
   loop:
@@ -685,6 +694,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-ga">
 <h3>Genetic algorithms</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Like breeding the fastest racehorses: keep the fastest ones from this generation, pair them up to make "foals" that mix traits from both parents (crossover), occasionally give a foal a random surprise trait (mutation), and repeat for many generations. Over time the whole population tends to get faster, because the winners keep passing on whatever made them win.</p></div></details>
 <p class="lede">Keep a population instead of a point, and generate new candidates by <em>recombining</em> good ones. Crossover is the only genuinely new idea in the unit — it is a jump through the space that no local search can make.</p>
 <div class="block"><b>GA</b>(f, pop size P, mating pool m, mutation rate μ):
   population ← P random individuals
@@ -730,6 +740,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-ro-probs">
 <h3>The benchmark problems, and what each is designed to expose</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>These are like obstacle courses designed to trip up specific searchers on purpose, so you can tell them apart. One course is basically flat with tiny random bumps everywhere (great for testing who handles noise well); another has a trap right before the real finish line (great for testing who gets fooled by a fake "good enough" answer). A good benchmark suite is a set of courses built to expose each algorithm's specific weakness.</p></div></details>
 <p>Assignment 2 asks you to pick problems that <em>highlight</em> different algorithms. Choose deliberately — the choice is half the grade.</p>
 <div class="tblwrap"><table>
 <tr><th>Problem</th><th>Structure</th><th>Highlights</th></tr>
@@ -754,6 +765,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-kmeans">
 <h3>k-means (Lloyd's algorithm)</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You're handed a scatter of dots and told "organize these into 3 friend groups." First you guess 3 random meeting spots. Everyone walks to whichever meeting spot is closest to them. Then each meeting spot moves to stand in the middle of its own group. Repeat — walk to the closest spot, spot moves to the new middle — until nobody needs to switch groups anymore.</p></div></details>
 <div class="block"><b>k-means</b>(X, k):
   initialize k centers                 # random points, or k-means++
   repeat:
@@ -825,6 +837,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-fs">
 <h3>Feature selection: filtering vs wrapping</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Packing a suitcase for a trip: some things you can decide to leave behind just by looking at them — "I clearly won't need snow boots for the beach," that's <b>filtering</b>, judged on their own. Other things you only know you don't need after actually trying to fit everything and seeing what you use — "I packed a 3rd pair of shoes and never wore them," that's <b>wrapping</b>, judged by trying the whole suitcase.</p></div></details>
 <p>Why bother: fewer features means less curse of dimensionality, faster training, less overfitting, and interpretability. But exhaustive subset selection is <span class="m">2<sup>d</sup></span> and provably NP-hard.</p>
 <div class="tblwrap"><table>
 <tr><th></th><th>Filtering</th><th>Wrapping</th></tr>
@@ -871,6 +884,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-mdp">
 <h3>Markov decision processes</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>A video game level where the only thing that matters for what happens next is exactly where you're standing right now — not how you got there, not what you did five turns ago. That "only the present matters" rule is called the <b>Markov property</b>, and an MDP is just a formal way to describe a world with that rule: places you can be, moves you can make, and rewards you might get.</p></div></details>
 <p class="lede">An MDP is the tuple <span class="m">⟨S, A, T, R, γ⟩</span>: states, actions, transition model <span class="m">T(s,a,s′) = P(s′ | s,a)</span>, reward <span class="m">R(s)</span> (or <span class="m">R(s,a)</span> / <span class="m">R(s,a,s′)</span>), and discount <span class="m">γ ∈ [0,1)</span>.</p>
 <p>The <b>Markov property</b>: the next state depends only on the current state and action, not on history. "Only the present matters" — and if it does not hold, you fix it by enlarging the state, not by ignoring it. Also assume stationarity: <span class="m">T</span> and <span class="m">R</span> do not change over time.</p>
 <div class="eq">Return: &nbsp; G<sub>t</sub> = R<sub>t</sub> + γR<sub>t+1</sub> + γ²R<sub>t+2</sub> + … = Σ<sub>k≥0</sub> γ<sup>k</sup>R<sub>t+k</sub><small>With |R| ≤ R<sub>max</sub>, the infinite sum is bounded by R<sub>max</sub>/(1−γ) — that is why γ &lt; 1 makes infinite horizons well-defined</small></div>
@@ -932,6 +946,7 @@ until π′ = π</div><p style="margin-top:8px">Evaluation costs <span class="m"
 
 <article class="topic" id="t-explore">
 <h3>Exploration vs exploitation</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You just moved to a new town with 20 restaurants. Do you keep going back to the one good restaurant you already found (<b>exploit</b>), or do you try a new random one tonight in case it's even better (<b>explore</b>)? Every smart strategy is really just a different rule for how often to try something new versus stick with your current favorite.</p></div></details>
 <p>You cannot learn about actions you never take, and you cannot collect reward while experimenting. Everything in this section is a way of pricing that trade.</p>
 <div class="tblwrap"><table>
 <tr><th>Strategy</th><th>Rule</th><th>Notes</th></tr>
@@ -975,6 +990,7 @@ until π′ = π</div><p style="margin-top:8px">Evaluation costs <span class="m"
 
 <article class="topic" id="t-rladv">
 <h3>Model-based vs model-free, and where the field goes next</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Model-based is like planning a road trip with a full map in hand — you can figure out the best route just by thinking, before you ever start driving. Model-free is like driving around a brand-new city with no map at all — you only learn which streets are good by actually driving down them and seeing what happens. Model-free needs way more real "driving" to learn the same thing, but it works even when nobody handed you a map to begin with.</p></div></details>
 <div class="tblwrap"><table>
 <tr><th></th><th>Model-based (VI / PI, Dyna, R-max)</th><th>Model-free (Q-learning, SARSA, TD)</th></tr>
 <tr><td>Needs T and R?</td><td>Yes — known or learned from counts</td><td>No</td></tr>

@@ -152,6 +152,11 @@ details.qa summary::before{content:"?"; font-family:var(--mono); font-size:11px;
 details.qa[open] summary{border-bottom:1px solid var(--line)}
 details.qa .ans{padding:12px 15px 14px 42px; font-size:15px; color:var(--ink-2)}
 details.qa .ans p:first-child{margin-top:0}
+details.eli5{border-color:var(--gold-bright); background:var(--gold-soft); margin:14px 0 20px}
+details.eli5 summary::before{content:"5"; background:var(--gold-bright)}
+details.eli5 summary{color:var(--ink); font-family:var(--display); font-size:16px}
+details.eli5[open] summary{border-bottom-color:var(--gold-bright)}
+details.eli5 .ans{font-size:15.5px; color:var(--ink-2)}
 .pillrow{display:flex; flex-wrap:wrap; gap:7px; margin:12px 0}
 .pill{font-family:var(--mono); font-size:11.5px; letter-spacing:.04em; padding:3px 9px; border-radius:99px;
   border:1px solid var(--line-2); color:var(--muted)}
@@ -296,6 +301,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-bias">
 <h3>Inductive bias: restriction vs preference</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You're guessing the shape of a hidden toy from a few peeks through a keyhole. Tons of different shapes would fit what you've seen — your <b>inductive bias</b> is your personal guessing rule, the thing that makes you assume "probably a simple, familiar shape" instead of some crazy spiky one nobody's ever seen. Different learners have different guessing rules, which is why they guess different toys from the very same peeks.</p></div></details>
 <p>A hypothesis space <span class="m">H</span> plus a search order is a bias. Split it in two — the distinction shows up in almost every exam question:</p>
 <ul>
 <li><b>Restriction bias</b> — what <span class="m">H</span> can represent at all. Linear regression restricts you to hyperplanes; a depth-1 tree restricts you to axis-aligned single splits.</li>
@@ -315,6 +321,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-biasvar">
 <h3>Bias–variance decomposition, and how to read a learning curve</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Think about throwing darts at a board. <b>Bias</b> is being a bad thrower for a boring, consistent reason — your arm always pulls left, so every dart lands left of the bullseye, again and again. <b>Variance</b> is being a wild thrower — darts land left, right, up, down, all over — you're unpredictable. A model that's too simple is the "always left" thrower; a model that's too complicated is the "wild" thrower — and you need to fix both to hit the middle.</p></div></details>
 <p>For squared loss with target <span class="m">y = f(x) + ε</span>, <span class="m">Var(ε) = σ²</span>, the expected error of a learner trained on random training sets decomposes exactly:</p>
 <div class="eq">E[(y − ĥ(x))²] = (E[ĥ(x)] − f(x))² + E[(ĥ(x) − E[ĥ(x)])²] + σ²<small>bias² &nbsp;+&nbsp; variance &nbsp;+&nbsp; irreducible noise</small></div>
 <p><b>Bias</b> is error from a hypothesis space too small or too rigid to contain the truth — it does not shrink with more data. <b>Variance</b> is sensitivity to which training sample you happened to draw — it does shrink with more data. This is why the two diagnostic curves say different things:</p>
@@ -327,6 +334,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-info">
 <h3>Information theory in one page</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Entropy is a fancy word for "how surprised would I be?" If someone tells you "the sky is blue" — meh, you basically knew that, so that's low entropy, not much real information. If they tell you "it snowed in the Sahara today" — whoa, genuinely surprising, high entropy, real information. A perfectly fair coin flip is the most surprising thing there is, because you truly can't guess it ahead of time.</p></div></details>
 <p>Entropy is the expected number of bits to encode a draw from <span class="m">P</span>; everything else in the unit is arithmetic on it.</p>
 <div class="eq">H(X) = − Σ<sub>x</sub> P(x) log₂ P(x) &nbsp;&nbsp;·&nbsp;&nbsp; H(X|Y) = Σ<sub>y</sub> P(y) H(X | Y=y)<br>I(X;Y) = H(X) − H(X|Y) = H(X) + H(Y) − H(X,Y)<small>Mutual information is symmetric, non-negative, and zero exactly when X ⫫ Y</small></div>
 <p>Two facts worth memorizing: entropy of a binary variable is maximal (1 bit) at <span class="m">p = 0.5</span> and 0 at <span class="m">p ∈ {0,1}</span>; and <b>KL divergence</b> <span class="m">D(P‖Q) = Σ P(x) log(P(x)/Q(x))</span> is non-negative, zero iff <span class="m">P = Q</span>, and <b>not symmetric</b> — so it is a divergence, not a distance. KL is the objective behind MIMIC's dependency-tree projection and behind maximum-likelihood fitting generally.</p>
@@ -463,6 +471,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
 
 <article class="topic" id="t-nn">
 <h3>Neural networks &amp; backpropagation</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Picture a long line of people playing a whispering game. The message gets garbled by the end, and the last person shouts "that's wrong!" <b>Backprop</b> is that last person turning around and telling the person before them exactly how much <em>they</em> messed it up, and that person turns around and blames the person before them, all the way back down the line — and everyone nudges how they whisper, just a tiny bit, so next time the message comes out better.</p></div></details>
 <p class="lede">A perceptron computes <span class="m">ŷ = step(w·x + b)</span> — a hyperplane. Stacking them with a differentiable nonlinearity turns a linear separator into a universal function approximator, and gradient descent does the credit assignment.</p>
 <h4>Two learning rules that are constantly confused</h4>
 <div class="tblwrap"><table>
@@ -491,6 +500,7 @@ update:   W ← W − η ∂E/∂W        (chain rule, reused bottom-up)</div>
 
 <article class="topic" id="t-svm">
 <h3>Support vector machines &amp; kernels</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Imagine red and blue marbles scattered on a table, too mixed up to separate with one straight line. The <b>kernel trick</b> is like tossing all the marbles up into the air — from up there, a flat sheet of paper can slice cleanly between the red ones and blue ones, even though no line worked down on the table. The clever bit: the math gets you the "from up there" answer without ever actually throwing anything.</p></div></details>
 <p class="lede">Of all separating hyperplanes, take the one furthest from both classes. Maximizing the margin is the preference bias, and it is what makes the solution depend on only a handful of points.</p>
 <div class="eq">maximize margin 2/‖w‖ &nbsp;⟺&nbsp; min ½‖w‖² &nbsp;s.t. y<sub>i</sub>(w·x<sub>i</sub> + b) ≥ 1<small>Soft margin: min ½‖w‖² + C Σξ<sub>i</sub>, with slack ξ<sub>i</sub> ≥ 0 for points inside the margin or misclassified</small></div>
 <p>The Lagrangian dual is where the magic lives:</p>
@@ -542,6 +552,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-clt">
 <h3>Computational learning theory: PAC &amp; VC</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You hire a fortune teller and want a guarantee: "if I show you enough example fortunes, you'll be right about the future at least 95% of the time." <b>PAC learning</b> is the math for figuring out exactly how many examples that guarantee needs. <b>VC dimension</b> measures how wildly flexible the fortune teller's stories can be — a teller who can spin any story to fit any facts (high VC dimension) needs way more examples before you should trust them, because they could just be making things up that happen to match what you showed them.</p></div></details>
 <p class="lede">The unit that asks not "does it work?" but "how many examples before it must work?" Learn the three inputs, the two bounds, and what VC dimension means operationally.</p>
 <p>The setting: a concept class <span class="m">C</span>, hypothesis space <span class="m">H</span>, unknown target <span class="m">c ∈ C</span>, examples drawn i.i.d. from a fixed but unknown <span class="m">D</span>. True error <span class="m">error<sub>D</sub>(h) = Pr<sub>x∼D</sub>[h(x) ≠ c(x)]</span>.</p>
 <div class="note"><span class="lab">PAC — probably approximately correct</span><p>A learner PAC-learns <span class="m">C</span> if for any <span class="m">ε, δ</span> it outputs, with probability at least <span class="m">1 − δ</span>, a hypothesis with error at most <span class="m">ε</span>, in time and samples polynomial in <span class="m">1/ε</span>, <span class="m">1/δ</span> and problem size. <em>Approximately</em> = the <span class="m">ε</span>; <em>probably</em> = the <span class="m">δ</span>.</p></div>
@@ -564,6 +575,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-bayes">
 <h3>Bayesian learning &amp; Naive Bayes</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You have a hunch it might rain today (your <b>prior</b>). You look outside and see dark clouds (new evidence). <b>Bayes' rule</b> is just the honest, careful way to mix your old hunch with the new evidence into an updated, better hunch (the <b>posterior</b>). "Naive" just means: to keep the math easy, pretend every clue — clouds, wind, humidity — is totally unrelated to the others, which isn't quite true but works surprisingly well anyway.</p></div></details>
 <p class="lede">Reframe learning as inference over hypotheses: instead of searching for a good <span class="m">h</span>, ask what the data does to your belief about all of them.</p>
 <div class="eq">P(h | D) = P(D | h) · P(h) / P(D)<small>posterior ∝ likelihood × prior</small></div>
 <ul>
@@ -643,6 +655,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-sa">
 <h3>Simulated annealing</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You're a marble rolling around a bumpy landscape hunting for the lowest point, but you can only feel the slope right under you — you can't see the whole map. Early on you're bouncing around like crazy (hot), even rolling uphill sometimes on purpose just to explore and escape shallow dips. As time passes you "cool down" and bounce less and less, until you're just gently settling into whichever valley you're in.</p></div></details>
 <p class="lede">Hill climbing that is allowed to go downhill, with a probability that decays over time. The metaphor is metallurgical: heat the metal so atoms rearrange freely, then cool slowly enough that they settle into a low-energy crystal instead of freezing into a defect.</p>
 <div class="block"><b>SA</b>(f, N, T₀, cooling α):
   x ← random point;  T ← T₀
@@ -698,6 +711,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-mimic">
 <h3>MIMIC</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Most search methods are one person hunting for treasure alone — try a spot, adjust, try again. MIMIC instead keeps a big crowd of guessers, throws out the worst half, and asks "what do all my best guessers have in common?" It writes that pattern down as a simple recipe, then generates a whole new crowd who follow it — like a search party sharing notes on what's working, instead of everyone wandering off alone.</p></div></details>
 <p class="lede">Mutual-Information-Maximizing Input Clustering. Instead of carrying points, carry a <em>probability distribution</em> over good points, and refine it. It is the only algorithm in the unit that conveys structure between iterations.</p>
 <div class="block"><b>MIMIC</b>(f, sample size N, keep quantile q):
   θ₀ ← uniform over X
@@ -768,6 +782,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-em">
 <h3>Soft clustering: EM and Gaussian mixtures</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Two friends each baked cookies from a secret recipe, then mixed all the cookies together in one jar — now you can't tell which cookie came from which recipe. <b>EM</b> plays a guessing game: first guess which recipe each cookie probably came from, use those guesses to update what you think each recipe actually is, then re-guess the cookies using the better recipe idea, and repeat — round and round, getting more confident each time, even though nobody ever tells you the real answer.</p></div></details>
 <p class="lede">k-means makes hard assignments. EM assigns <em>responsibilities</em> — each point belongs to every cluster with a probability — which lets clusters overlap and have shapes.</p>
 <div class="block"><b>EM for a GMM</b>:
   <b>E-step</b>: γ<sub>ij</sub> = P(cluster j | x<sub>i</sub>) = π<sub>j</sub>·N(x<sub>i</sub> | μ<sub>j</sub>, Σ<sub>j</sub>) / Σ<sub>l</sub> π<sub>l</sub>·N(x<sub>i</sub> | μ<sub>l</sub>, Σ<sub>l</sub>)
@@ -789,6 +804,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-clprops">
 <h3>Hierarchical clustering &amp; the impossibility theorem</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You'd think there's one "correct" way to sort a big pile of LEGO bricks — by color? by size? by shape? Kleinberg proved something wild: you can write down 3 totally reasonable rules for what a "good sorting method" should do, and it's mathematically impossible for any method to follow all 3 at once. There's no such thing as one objectively "best" way to group things — it always depends on what you actually care about.</p></div></details>
 <p><b>Single-linkage agglomerative clustering</b>: start with <span class="m">n</span> singleton clusters, repeatedly merge the two clusters whose closest pair of points is nearest, until <span class="m">k</span> remain. Complexity <span class="m">O(n³)</span> naively, <span class="m">O(n² log n)</span> with a heap. The linkage choice changes everything:</p>
 <div class="tblwrap"><table>
 <tr><th>Linkage</th><th>Inter-cluster distance</th><th>Behaviour</th></tr>
@@ -824,6 +840,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-dr">
 <h3>Feature transformation: PCA, ICA, RCA, LDA</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Imagine photographing a lumpy 3D sculpture, but you can only keep one flat photo. You'd pick the angle that shows the most interesting detail, not the boring flat side. <b>PCA</b> does exactly that to data: it finds the "best angle" to look from — the direction where the data is most spread out and interesting — and keeps that, throwing away the boring, flat angles. It doesn't know or care about labels or categories; it just chases variety.</p></div></details>
 <p class="lede">Selection picks a subset of the original axes; transformation builds new axes as combinations of the old ones. Four methods, four different objectives — know which is which and you can answer almost any question in this section.</p>
 <div class="tblwrap"><table>
 <tr><th>Method</th><th>Maximizes / seeks</th><th>Components are</th><th>Best for</th></tr>
@@ -863,6 +880,7 @@ H(x) = sign(Σ<sub>t</sub> α<sub>t</sub> h<sub>t</sub>(x))</div>
 
 <article class="topic" id="t-bellman">
 <h3>Bellman equations, value iteration, policy iteration</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>"How good is it to be right here?" equals "how good is my very next step, plus a slightly-discounted amount of however good things are after that — forever." The <b>Bellman equation</b> is just that idea written in math: the value of now is built out of the value of next, like Russian nesting dolls, where each doll holds a smaller, slightly-shrunk copy of the next one inside it.</p></div></details>
 <div class="eq">V<sup>π</sup>(s) = R(s) + γ Σ<sub>s′</sub> T(s,π(s),s′) V<sup>π</sup>(s′)<br>V*(s) = R(s) + γ max<sub>a</sub> Σ<sub>s′</sub> T(s,a,s′) V*(s′)<br>Q*(s,a) = R(s,a) + γ Σ<sub>s′</sub> T(s,a,s′) max<sub>a′</sub> Q*(s′,a′)<br>π*(s) = argmax<sub>a</sub> Σ<sub>s′</sub> T(s,a,s′) V*(s′)<small>V is a value over states; Q is a value over state–action pairs — and only Q lets you act without knowing T</small></div>
 <div class="grid2">
 <div class="mini"><h5>Value iteration</h5><div class="block" style="margin:8px 0 0; font-size:13px">V₀ ← arbitrary
@@ -892,6 +910,7 @@ until π′ = π</div><p style="margin-top:8px">Evaluation costs <span class="m"
 
 <article class="topic" id="t-q">
 <h3>Q-learning &amp; temporal difference</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>You're learning to cook a brand-new dish purely by tasting as you go — no recipe book, no one telling you the rules. Every time you take a bite, you compare "how good I expected this to taste" against "how it actually tasted," and you nudge your future guesses a little closer to reality. Do that enough times, tasting enough dishes, and eventually your guesses become spot-on — without ever seeing an actual recipe.</p></div></details>
 <p class="lede">Drop the model. Q-learning learns <span class="m">Q*</span> from experience tuples <span class="m">(s, a, r, s′)</span> alone — no <span class="m">T</span>, no <span class="m">R</span>, and it still converges to the optimal Q.</p>
 <div class="eq">Q(s,a) ← Q(s,a) + α [ r + γ max<sub>a′</sub> Q(s′,a′) − Q(s,a) ]<small>the bracket is the TD error δ: what happened minus what you expected</small></div>
 <div class="tblwrap"><table>
@@ -927,6 +946,7 @@ until π′ = π</div><p style="margin-top:8px">Evaluation costs <span class="m"
 
 <article class="topic" id="t-gt">
 <h3>Game theory: when the environment has its own agenda</h3>
+<details class="qa eli5"><summary>🧸 Explain like I'm 5</summary><div class="ans"><p>Playing rock-paper-scissors against someone smart: if you always throw rock, they'll figure it out and always throw paper to beat you. The only way to not get outsmarted is to mix up your throws randomly and unpredictably — and it turns out there's a mathematically "best" way to mix, called an <b>equilibrium</b>, where neither player can do any better by secretly changing their plan.</p></div></details>
 <p class="lede">Everything since <a href="#t-mdp">MDPs</a> assumed one agent against a stationary world. Game theory is what happens when the "environment" is one or more other agents optimizing their own reward — the course's other major thread from Littman's own research (minimax-Q, 1994).</p>
 <h4>Normal-form games</h4>
 <p>A game is players, an action set per player, and a payoff for every action profile. Two ideas decide most of what you're asked to reason about:</p>

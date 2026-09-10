@@ -271,7 +271,7 @@ mark{background:var(--gold-soft); color:var(--ink); border-bottom:1px solid var(
   </div>
   <nav id="toc"></nav>
   <div class="railfoot">
-    <button class="tbtn" id="themeb">Theme</button>
+    <button class="tbtn" id="themeb">🖥️ Auto</button>
     <button class="tbtn" id="resetb">Reset progress</button>
   </div>
 </aside>
@@ -1187,13 +1187,24 @@ function pal(){return{bg:css('--bg'),sf:css('--surface'),ink:css('--ink'),mut:cs
 
 /* ---------- theme ---------- */
 var TK='ml7641-theme';
-function applyTheme(t){ if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);} else {document.documentElement.removeAttribute('data-theme');} redrawAll(); }
-try{var st=localStorage.getItem(TK); if(st)applyTheme(st);}catch(e){}
-$('#themeb').addEventListener('click',function(){
-  var cur=document.documentElement.getAttribute('data-theme')||'system';
-  var next=cur==='system'?'dark':cur==='dark'?'light':'system';
-  applyTheme(next); this.textContent= next==='system'?'Theme':(next==='dark'?'Dark':'Light');
-  try{localStorage.setItem(TK,next);}catch(e){}
+var THEME_ICON={system:'🖥️',light:'☀️',dark:'🌙'}, THEME_LABEL={system:'Auto',light:'Light',dark:'Dark'};
+var themeb=$('#themeb');
+function paintThemeBtn(mode){
+  themeb.textContent=THEME_ICON[mode]+' '+THEME_LABEL[mode];
+  themeb.title='Theme: '+THEME_LABEL[mode]+' — click to change';
+}
+function applyTheme(t){
+  if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}
+  else{document.documentElement.removeAttribute('data-theme'); t='system';}
+  paintThemeBtn(t); redrawAll();
+}
+var themeMode='system';
+try{var st=localStorage.getItem(TK); if(st==='light'||st==='dark')themeMode=st;}catch(e){}
+applyTheme(themeMode);
+themeb.addEventListener('click',function(){
+  themeMode = themeMode==='system'?'light':themeMode==='light'?'dark':'system';
+  applyTheme(themeMode);
+  try{ themeMode==='system'?localStorage.removeItem(TK):localStorage.setItem(TK,themeMode); }catch(e){}
 });
 
 /* ---------- TOC + progress ---------- */
@@ -1338,7 +1349,7 @@ function mk(id,h){
     cv.width=w*dpr; cv.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); return {w:w,h:h}; }
   return {cv:cv,ctx:ctx,size:size};
 }
-function redrawAll(){ drawers.forEach(function(f){try{f();}catch(e){}}); }
+function redrawAll(){ (drawers||[]).forEach(function(f){try{f();}catch(e){}}); }
 window.addEventListener('resize',function(){redrawAll();});
 
 /* ================= 1. entropy ================= */

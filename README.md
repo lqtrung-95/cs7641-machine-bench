@@ -23,6 +23,10 @@ A single-page, self-contained review site for Georgia Tech OMSCS **CS 7641: Mach
   16-week table (lessons, due dates), auto-highlighted from the browser's clock. Lessons with no
   matching topic on the site yet are marked "not here yet" instead of link. Edit the `SCHED` array
   in the script if your section's dates differ.
+- **ELI5 + Vietnamese explanations** — every concept topic has a collapsible "Explain like I'm 5" box and a
+  plain-language Vietnamese explanation (key English terms kept in parentheses to match the exam).
+- **Mock final exam** — 121 multiple-choice / multi-select / true-false questions across SL, RO, UL and RL,
+  with per-question feedback and a running score.
 - Full-text search, per-topic progress tracking (`localStorage`), light/dark/system themes.
 
 ## Running it
